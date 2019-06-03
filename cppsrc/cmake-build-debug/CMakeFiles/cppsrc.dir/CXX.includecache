@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/main.cpp
+iostream
+-
+cstdio
+-
+cmath
+-
+fstream
+-
+array
+-
+
