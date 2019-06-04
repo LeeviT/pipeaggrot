@@ -1,0 +1,7 @@
+pysrc/.idea/
+pysrc/venv/
+cppsrc/.idea/
+cppsrc/cmake-build-debug/
+cppsrc/a.out
+pysrc/*.dat
+

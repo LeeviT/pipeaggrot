@@ -13,13 +13,15 @@ def readfile(filename):
     return t, visc
 
 
-r, vx = readfile('r_vx.dat')
+t1, visc1 = readfile('viscoraw1.dat')
+t2, visc2 = readfile('viscoraw2.dat')
 
-print(r)
-print(vx)
+# print(r)
+# print(vx)
 
-plt.plot(r, vx, '-bo')
+plt.plot(t1, visc1, '-bo')
+plt.plot(t2, visc2, '-r')
 # plt.xscale('log')
-plt.xlim(0, 0.12)
-plt.ylim(0, 2)
+plt.xlim(0.005, 0.1)
+plt.ylim(0.072, 0.0783)
 plt.show()
