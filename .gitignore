@@ -5,3 +5,10 @@ cppsrc/cmake-build-debug/
 cppsrc/a.out
 *.dat
 cppsrc/.*
+cppsrc/boost/
+cppsrc/cvode/
+cppsrc/cvodes/
+cppsrc/include/
+cppsrc/nvector/
+cppsrc/*.exe
+cppsrc/sundials/
