@@ -5,10 +5,10 @@ CC = g++
 ## Optimize 
 COPTS = -std=c++11 -pg -O2 -m3dnow -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
 ## Madman
-#COPTS = -O3 -march=native -funroll-loops -ftree-loop-linear -fprefetch-loop-arrays -DBOOST_DISABLE_ASSERTS
+# COPTS = -O3 -march=native -funroll-loops -ftree-loop-linear -fprefetch-loop-arrays -DBOOST_DISABLE_ASSERTS
 # Debug options
-#COPTS = -DDEBUG -g -pg -O5 -m3dnow -mssse3 -finline-functions -fprofile-arcs -ftest-coverage -ffast-math -mrecip
-INCL = -I. -I/home/mmo/include/
+# COPTS = -DDEBUG -g -pg -O5 -m3dnow -mssse3 -finline-functions -fprofile-arcs -ftest-coverage -ffast-math -mrecip
+INCL = -I. -I/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc
 # Linking needs -lm to enable certain mathematical functions
 LINK = -L/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/include/lib/ -lsundials_nvecserial -lsundials_cvode -lm -llapack -lblas -lgcov
 # LINK = -L/home/mmo/lib/ -lm -llapack -lblas -lgcov

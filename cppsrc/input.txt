@@ -1,6 +1,6 @@
 pressure_diff = 12.0
 pipe_length = 20.0
-visc = 1.5
+visc = 1
 radius = 2.0
-ny = 200
-t_max = 2
+ny = 20
+t_max = 5

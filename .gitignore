@@ -12,3 +12,4 @@ cppsrc/include/
 cppsrc/nvector/
 cppsrc/*.exe
 cppsrc/sundials/
+cppsrc/gmon.out

@@ -9,8 +9,8 @@ add_executable(cppsrc
         Combo_class.cpp
         Combo_class.hpp
         dist_combo.hpp
+        calcvisc.cpp
         main.cpp
-        main_velo.cpp
         makefile
         orientation_control_vol.hpp
         orientation_control_vol_acorrected.cpp

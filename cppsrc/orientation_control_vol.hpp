@@ -16,7 +16,7 @@
 typedef boost::multi_array<double, 2>  d2vec;
 typedef boost::detail::multi_array::multi_array_view<double, 2> d2vec_view; 
 
-class Orientation_ao{
+class Orientation_ao {
 private:
     int s1, s2;
     int runalready;
@@ -32,8 +32,8 @@ private:
     ///Get rotation velocities according to shear rate (Jeffery equation)
     ///Currently this is only used in initialize_abcde, 
     ///so speed is not relevant
-    triple dot_p(double phi_, double theta_);
-    triple dot_p2(double phi_, double theta_);
+    //triple dot_p(double phi_, double theta_);
+    //triple dot_p2(double phi_, double theta_);
     ///dot_p in spherical coordinates 
     std::pair<double, double> dot_p_angles(double phi_, double theta_);
     std::pair<double, double> dot_p_angles2(double phi_, double theta_);
@@ -169,25 +169,26 @@ public:
     ///TODO:: Optimize this heavily
     ///since we need w_dist, this is currently a template function ..
     template <class d2vec_view1>
-    d2vec get_tau_raw(const d2vec_view1 &w_dist){
+    d2vec get_tau_raw(const d2vec_view1 &w_dist) {
         d2vec a4_D(boost::extents[3][3]);
-        std::fill(a4_D.data(),a4_D.data()+a4_D.num_elements(),0.0);
+        std::fill(a4_D.data(), a4_D.data() + a4_D.num_elements(), 0.0);
         //define D
         //D should be defined somewhere else
-        double D[3][3]={0.0}; 
-        D[s1][s2]=D[s2][s1]=shear_rate/2.0;
+        double D[3][3] = {0.0};
+        D[s1][s2]=D[s2][s1] = shear_rate/2.0;
         //get "a4" fourth order orientation tensor (function of w_dist)
-        double a4[3][3][3][3]={0.0};
-        for(int phi_now=0; phi_now!=N; phi_now++){
-            for(int theta_now=0; theta_now!=M; theta_now++){
+        double a4[3][3][3][3] = {0.0};
+        for (int phi_now = 0; phi_now != N; phi_now++) {
+            for (int theta_now = 0; theta_now != M; theta_now++) {
                 triple p_triple(phi[phi_now],theta[theta_now]);  //These should be stored somewhere 
-                double p_[3]={p_triple.x,p_triple.y,p_triple.z}; //or even these                
-                for(int i=0; i!=3; ++i){
-                    for(int j=0; j!=3; ++j){
-                        for(int k=0; k!=3; ++k){
-                            for(int l=0; l!=3; ++l){
-                                //basically one could even store something like a4_raw[phi_now][theta_now][i][j][k][l]
-                                a4[i][j][k][l]+=p_[i]*p_[j]*p_[k]*p_[l]*area[phi_now][theta_now]*w_dist[phi_now][theta_now];
+                double p_[3] = {p_triple.x, p_triple.y, p_triple.z}; //or even these
+                for (int i = 0; i != 3; ++i) {
+                    for (int j = 0; j != 3; ++j) {
+                        for (int k = 0; k != 3; ++k) {
+                            for (int l = 0; l != 3; ++l) {
+                                // basically one could even store something like a4_raw[phi_now][theta_now][i][j][k][l]
+                                a4[i][j][k][l] += p_[i]*p_[j]*p_[k]*p_[l]*area[phi_now][theta_now]* \
+                                                  w_dist[phi_now][theta_now];
                             }
                         }
                     }
@@ -195,11 +196,11 @@ public:
             }
         }
         //Get a4:D
-        for(int i=0; i!=3; ++i){
-            for(int j=0; j!=3; ++j){
-                for(int k=0; k!=3; ++k){
-                    for(int l=0; l!=3; ++l){
-                        a4_D[i][j]+=a4[i][j][k][l]*D[k][l];
+        for (int i = 0; i != 3; ++i) {
+            for (int j = 0; j != 3; ++j) {
+                for (int k = 0; k != 3; ++k) {
+                    for (int l = 0; l != 3; ++l) {
+                        a4_D[i][j] += a4[i][j][k][l]*D[k][l];
                     }
                 }
             }

@@ -125,11 +125,9 @@ double Combo_class::get_visc_raw(int s1_, int s2_) {
 
 ///THIS should give the stress part due to the orientation...
 double Combo_class::get_tau_raw(int s1_, int s2_){
-    cout << "Here comes the tau!"<< endl;
     d2vec tau_raw(boost::extents[3][3]);
     std::fill(tau_raw.data(),tau_raw.data()+tau_raw.num_elements(),0.0); //fill with zeroes
     for(int i=0; i!=classes; ++i) {
-        cout << "At class " << i << endl;
         //Np varies linearly with the population variable n
         double Npi;
         if (classes==1) {

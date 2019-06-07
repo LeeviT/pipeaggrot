@@ -12,8 +12,8 @@
 ///by calling the appropiate transform function! 
 class triple{
 public:
-    double x, y, z;
-    double phi, theta, r;
+    double x{}, y{}, z{};
+    double phi{}, theta{}, r{};
     triple():x(0.0), y(0.0), z(0.0){;}
     triple(const double &phi_, const double &theta_){transform(phi_,theta_);}
     triple(const double &first_,const double &second_, const double &third_):x(first_),y(second_),z(third_){;}
