@@ -24,6 +24,7 @@ void Combo_class::initialize(double aspect_ratio, double shear_rate_,
     d_classes=1.0/classes;
     visco0=visco0_;
     Np_max=Np_max_;
+    // By default aggregation model is not used but if condition is true, create aggregation class
     if(classes > 1)  aggregation_class.initialize(classes, shear_rate, beta_now, shear_rate_max);
     //Each size has its own orienation object
     //The diffusion coefficient is a function of the class
@@ -159,11 +160,11 @@ double Combo_class::get_tau_raw(int s1_, int s2_){
 }
 
 ///Get probability for each size class
-void Combo_class::get_tot_prob(double time_now){
-    cout << "ClassProb c= " << classes << " t= " << time_now << " ";
-	double aggr_prob=0.0;
-    for (int i=0; i!=classes; ++i){
-        multi_array_ref<double, 2>::array_view<2>::type tempView_wdist=distribution[indices[i][range(0,N)][range()]];
+void Combo_class::get_tot_prob(double time_now) {
+    cout << "ClassProb c = " << classes << " t = " << time_now << " ";
+	double aggr_prob = 0.0;
+    for (int i = 0; i != classes; ++i) {
+        multi_array_ref<double, 2>::array_view<2>::type tempView_wdist = distribution[indices[i][range(0,N)][range()]];
         cout << orientation_class[i].get_tot_prob(tempView_wdist) << " ";
 		aggr_prob += distribution[i][N][0];
     }
@@ -177,4 +178,9 @@ void Combo_class::save_aggr_distribution(double time_now){
 		save_file << distribution[i][N][0] << endl;
 	}
 	save_file << "\n\n";
+}
+
+//
+void Combo_class::update_shear_rate(double shear_rate_t) {
+    shear_rate = shear_rate_t;
 }

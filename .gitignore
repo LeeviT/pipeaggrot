@@ -1,5 +1,6 @@
 pysrc/.idea/
 pysrc/venv/
+pysrc/*.mp4
 cppsrc/.idea/
 cppsrc/cmake-build-debug/
 cppsrc/a.out

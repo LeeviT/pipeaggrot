@@ -3,7 +3,7 @@ CC = g++
 # Default
 #COPTS = -pg -DBOOST_DISABLE_ASSERTS
 ## Optimize 
-COPTS = -std=c++11 -pg -O2 -m3dnow -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
+COPTS = -std=c++11 -pg -Ofast -m3dnow -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
 ## Madman
 # COPTS = -O3 -march=native -funroll-loops -ftree-loop-linear -fprefetch-loop-arrays -DBOOST_DISABLE_ASSERTS
 # Debug options
