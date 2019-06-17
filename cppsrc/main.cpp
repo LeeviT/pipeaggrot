@@ -34,6 +34,13 @@ class point {
 private:
     double x, r, visc, vx;
 public:
+    // Constructor
+    point() {
+        point::x = 0.0;
+        point::r = 0.0;
+        point::visc = 0.0;
+        point::vx = 0.0;
+    }
     // Function for printing values of a point, mostly for debugging
     void print_values() const {
         printf("x=%f, r=%f, visc=%f, vx=%f\n", x, r, visc, vx);
@@ -44,10 +51,10 @@ public:
     void setvisc(double visc) { point::visc = visc; };
     void setvx(double vx) { point::vx = vx; }
     // Getter functions for each variable
-    double getx() const { return x; };
-    double getr() const { return r; };
-    double getvisc() const { return visc; };
-    double getvx() const { return vx; };
+    double getx() { return x; };
+    double getr() { return r; };
+    double getvisc() { return visc; };
+    double getvx() { return vx; };
 };
 
 // Structure for handling input and returning it
@@ -105,7 +112,7 @@ double vx_pipe(point single_point, double dp, double l, double radius) {
 }
 
 // Writes r values and x-velocities along the radius to text file
-void write_r_vx(int ny, int t_step, point radius[]) {
+void write_r_vx(int ny, int t_step, vector<point> radius) {
     ofstream file;
     file.open("../pysrc/r_vx" + to_string(t_step) + ".dat");
     for (int i = 0; i <= ny; i++) {
@@ -127,8 +134,21 @@ input read_input_file() {
         if (a == "pipe_length") { values.setl(c); }
         if (a == "visc") { values.setvisc0(c); }
         if (a == "radius") { values.setR(c); }
+        if (a == "dt") { values.setdt(c); }
+        if (a == "diffusion_coeff") { values.setdiff_coeff(c); }
+        if (a == "aspect_ratio") { values.setaspect_ratio(c); }
+        if (a == "beta") { values.setbeta(c); }
+        if (a == "shear_rate_max") { values.setshear_rate_max(c); }
+        if (a == "Np_max") { values.setNp_max(c); }
         if (a == "ny") { values.setny((int) c); }
         if (a == "t_max") { values.sett_max((int) c); }
+        if (a == "theta_grid") { values.settheta_grid((int) c); }
+        if (a == "phi_grid") { values.setphi_grid((int) c); }
+        if (a == "classes") { values.setclasses((int) c); }
+        if (a == "what_todo") { values.setwhat_todo((int) c); }
+        if (a == "s1") { values.sets1((int) c); }
+        if (a == "s2") { values.sets2((int) c); }
+        if (a == "t0") { values.sett0((int) c); }
     }
     file.close();
     return values;
@@ -164,20 +184,28 @@ int main() {
     Combo_class *user_data;
     input params{};
     vector<double> visc_vector;
-    double time = 0, shear_rate = 100.0, visc_raw_til, visc;
+    vector<point> radius;
+    double time = 0, shear_rate = 10.0, visc_raw_til, visc;
     int system_size;
 
-    // Assigns input values to local variables using input structure
-    // Some values won't change during program runs so maybe could use values straight from struct, more error prone?
+    // Read input file and assign input values to input::params struct
     params = read_input_file();
-    printf("dp=%f, l=%f, visc=%f, R=%f, ny=%i, t_max=%i\n", params.getdp(), params.getl(), params.getvisc0(),
-            params.getR(), params.getny(), params.gett_max());
+    printf("dp=%f, l=%f, visc=%f, R=%f, dt=%f, diff_coeff=%f\n", params.getdp(), params.getl(), params.getvisc0(),
+            params.getR(), params.getdt(), params.getdiff_coeff());
+    printf("aspect_ratio=%f, beta=%f, shear_rate_max=%f, Np_max=%f\n", params.getaspect_ratio(), params.getbeta(),
+            params.getshear_rate_max(), params.getNp_max());
+    printf("theta_grid=%i, phi_grid=%i, classes=%i, what_todo=%i\n", params.gettheta_grid(), params.getphi_grid(),
+            params.getclasses(), params.getwhat_todo());
+    printf("s1=%i, s2=%i, ny=%i, t0=%i, t_max=%i\n", params.gets1(), params.gets2(), params.getny(), params.gett0(),
+            params.gett_max());
 
     // Allocate memory and initialize viscosity vector for the first timestep
     visc_vector = init_visc_vector(params.getny() + 1, params.getvisc0());
 
-    // Create point object, ny points along radius of the pipe
-    point radius[params.getny() + 1];
+    // Initialize the radius vector, ny+1 points along radius of the pipe
+    for (int i = 0; i <= params.getny(); i++) {
+        radius.push_back(point());
+    }
 
     visc = params.getvisc0();
     system_size = (params.getphi_grid() + 1)*params.gettheta_grid()*params.getclasses();
@@ -242,6 +270,7 @@ int main() {
         combined.save_aggr_distribution(time);
 
         // Writes r and vx values to file
+        // printf("ny=%i, t_step=%i, vx=%f\n", params.getny(), t_step, radius[0].getvx());
         write_r_vx(params.getny(), t_step, radius);
     }
     visctotfile.close();
