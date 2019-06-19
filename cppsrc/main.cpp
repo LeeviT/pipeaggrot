@@ -181,13 +181,16 @@ int main() {
     double r;
     // Initialize variables and class instances
     ofstream visctotfile;
-    Combo_class combined;
-    Combo_class * user_data;
     input params{};
+    vector<Combo_class> combined;
+    vector<Combo_class *> user_data;
     vector<double> visc_vector;
     vector<point> radius;
     double time = 0, shear_rate = 100.0, visc_raw_til, visc;
     int system_size;
+    // Initialize sundials stuff
+    vector<void *> cvode_mem;
+    vector<N_Vector> y0;
 
     // Read input file and assign input values to input::params struct
     params = read_input_file();
@@ -204,37 +207,41 @@ int main() {
     // Allocate memory and initialize viscosity vector for the first timestep
     visc_vector = init_visc_vector(params.getny() + 1, params.getvisc0());
 
-    // Initialize the radius vector, ny+1 points along radius of the pipe
+    // Initialize radius and combined vectors, ny+1 points along radius of the pipe
     // This must be done using *_back() function since radius vector is accessed index-wise later on
-    for (int i = 0; i <= params.getny(); i++) { radius.emplace_back(); }
+    for (int i = 0; i <= params.getny(); i++) {
+        radius.emplace_back();
+        combined.emplace_back();
+    }
 
     // Initialize viscosity value based on the input viscosity
     visc = params.getvisc0();
-    // Population system size in spherical coordinates
-    system_size = (params.getphi_grid() + 1)*params.gettheta_grid()*params.getclasses();
-    // Initialize AO model class instance using input values
-    combined.initialize(params.getaspect_ratio(), shear_rate, params.getdiff_coeff(), params.getclasses(),
-                        params.getphi_grid(), params.gettheta_grid(), params.gets1(), params.gets2(),
-                        params.getwhat_todo(), params.getvisc0(), params.getNp_max(), params.getbeta(),
-                        params.getshear_rate_max());
-    user_data = &combined;
-    // Initialize sundials stuff
-    void * cvode_mem = nullptr;
-    N_Vector y0 = nullptr;
-    y0 = N_VNew_Serial(system_size);
-    // Set uniform distribution
-    for (int i = 0; i != system_size; ++i) { combined.set_uniform_state(NV_DATA_S(y0)); }
-    cvode_mem = CVodeCreate(CV_ADAMS, CV_FUNCTIONAL);
-    CVodeSetUserData(cvode_mem, user_data);
-    // Initialize the integrator memory
-    CVodeInit(cvode_mem, wfunc, params.gett0(), y0);
-    // Set the error weights
-    CVodeSStolerances(cvode_mem, 1.0e-8, 1.0e-8);
-    CVodeSetMaxNumSteps(cvode_mem, 100000);
-    // Specify dense solver
-    CVSpgmr(cvode_mem, 0, 0);
-    // We need to run the solver for very tiny timestep to initialize it properly:
-    CVode(cvode_mem, 1e-14, y0, &time, CV_ONE_STEP);
+
+    // Create ny population
+    for (int i = 0; i <= params.getny(); i++) {
+        // Population system size in spherical coordinates
+        system_size = (params.getphi_grid() + 1) * params.gettheta_grid() * params.getclasses();
+        // Initialize AO model class instance (single population) using input values
+        combined.at(i).initialize(params.getaspect_ratio(), shear_rate, params.getdiff_coeff(), params.getclasses(),
+                            params.getphi_grid(), params.gettheta_grid(), params.gets1(), params.gets2(),
+                            params.getwhat_todo(), params.getvisc0(), params.getNp_max(), params.getbeta(),
+                            params.getshear_rate_max());
+        user_data.push_back(&combined.at(i));
+        y0.push_back(N_VNew_Serial(system_size));
+        // Set uniform distribution
+        for (int j = 0; j < system_size; j++) { combined.at(i).set_uniform_state(NV_DATA_S(y0.at(i))); }
+        cvode_mem.push_back(CVodeCreate(CV_ADAMS, CV_FUNCTIONAL));
+        CVodeSetUserData(cvode_mem.at(i), user_data.at(i));
+        // Initialize the integrator memory
+        CVodeInit(cvode_mem.at(i), wfunc, params.gett0(), y0.at(i));
+        // Set the error weights
+        CVodeSStolerances(cvode_mem.at(i), 1.0e-8, 1.0e-8);
+        CVodeSetMaxNumSteps(cvode_mem.at(i), 100000);
+        // Specify dense solver
+        CVSpgmr(cvode_mem.at(i), 0, 0);
+        // We need to run the solver for very tiny timestep to initialize it properly:
+        CVode(cvode_mem.at(i), 1e-14, y0.at(i), &time, CV_ONE_STEP);
+    }
 
     // Open file to write visctot values
     visctotfile.open("../pysrc/visctot.dat");
@@ -246,43 +253,47 @@ int main() {
         // Set new viscosity values if not in the very first timestep
         if (t_step > 0) { visc_vector = set_visc_vector(params.getny(), visc); }
 
-        // Sets values for the point in the y-midpoint
-        radius[0].setr(0.0);
-        radius[0].setvisc(visc_vector[0]);
-        radius[0].setx(1.0);
-        radius[0].setvx(vx_pipe(radius[0], params.getdp(), params.getl(), params.getR()));
-
         // Loop goes through the other points in y-direction, starting from the middle and sets the following
         // values for each discretization point
-        for (int i = 1; i <= params.getny(); i++) {
-            r = ((double) i / params.getny()) * params.getR();
+        for (int i = 0; i <= params.getny(); i++) {
+            // If in y-midpoint of the pipe, r coordinate is zero, naturally
+            if (i == 0) {
+                r = 0.0;
+            } else {
+                r = ((double) i / params.getny()) * params.getR();
+            }
             radius[i].setr(r);
             radius[i].setvisc(visc_vector[i]);
             radius[i].setx(1.0);
             radius[i].setvx(vx_pipe(radius[i], params.getdp(), params.getl(), params.getR()));
+
+            // Update shear rate for the AO model
+            combined.at(i).update_shear_rate(radius[i].getvx());
+
+            // Some AO model solver stuff
+            CVode(cvode_mem.at(i), (time + params.getdt()), y0.at(i), &time, CV_NORMAL);
+            visc_raw_til = combined.at(i).get_visc_raw(params.gets1(), params.gets2()); //luetaan visc_raw muuttujaan
+
+            // Compute total viscosity of the fluid
+            visc = params.getvisc0() + 2 * params.getvisc0() * visc_raw_til;  //Käytä: visc_raw Np_max visc0
+
+            // Some printing stuff
+            visctotfile << time << "\t" << visc << endl;
+            cout << "#AT time " << time << endl;
+            cout << "#VISCOTOT " << time << " " << visc << endl;
+            combined.at(i).save_aggr_distribution(time);
         }
-        printf("vx=%f\n", radius[1].getvx());
-        // Update shear for the AO model
-        combined.update_shear_rate(radius[1].getvx());
-        // Some AO model solver stuff
-        CVode(cvode_mem, (time + params.getdt()), y0, &time, CV_NORMAL);
-        visc_raw_til = combined.get_visc_raw(params.gets1(), params.gets2()); //luetaan visc_raw muuttujaan
-        // Compute total viscosity of the fluid
-        visc = params.getvisc0() + 2*params.getvisc0()*visc_raw_til;  //Käytä: visc_raw Np_max visc0
-        // Some printing stuff
-        visctotfile << time << "\t" << visc << endl;
-        cout << "#AT time " << time << endl;
-        cout << "#VISCOTOT " << time << " " << visc << endl;
-        combined.save_aggr_distribution(time);
 
         // Writes r and vx values to file
         write_r_vx(params.getny(), t_step, radius);
     }
     visctotfile.close();
 
-    combined.save_state();
-    N_VDestroy_Serial(y0);
-    CVodeFree(&cvode_mem);
+    for (int i = 0; i <= params.getny(); i++) {
+        combined.at(i).save_state();
+        N_VDestroy_Serial(y0.at(i));
+        CVodeFree(&cvode_mem.at(i));
+    }
 
     return 0;
 }
