@@ -180,17 +180,17 @@ int main() {
     // Dummy variable for point class objects
     double r;
     // Initialize variables and class instances
-    ofstream visctotfile;
     input params{};
     vector<Combo_class> combined;
     vector<Combo_class *> user_data;
     vector<double> visc_vector;
     vector<point> radius;
-    double time = 0, shear_rate = 100.0, visc_raw_til, visc;
+    double time = 0, shear_rate = 10.0, visc_raw_til, visc;
     int system_size;
     // Initialize sundials stuff
     vector<void *> cvode_mem;
     vector<N_Vector> y0;
+    vector<ofstream> visctotfile;
 
     // Read input file and assign input values to input::params struct
     params = read_input_file();
@@ -212,6 +212,7 @@ int main() {
     for (int i = 0; i <= params.getny(); i++) {
         radius.emplace_back();
         combined.emplace_back();
+        visctotfile.emplace_back();
     }
 
     // Initialize viscosity value based on the input viscosity
@@ -242,9 +243,6 @@ int main() {
         // We need to run the solver for very tiny timestep to initialize it properly:
         CVode(cvode_mem.at(i), 1e-14, y0.at(i), &time, CV_ONE_STEP);
     }
-
-    // Open file to write visctot values
-    visctotfile.open("../pysrc/visctot.dat");
 
     // The main timestep loop
     for (int t_step = 0; t_step <= params.gett_max(); t_step++) {
@@ -278,7 +276,9 @@ int main() {
             visc = params.getvisc0() + 2 * params.getvisc0() * visc_raw_til;  //Käytä: visc_raw Np_max visc0
 
             // Some printing stuff
-            visctotfile << time << "\t" << visc << endl;
+            visctotfile.at(i).open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
+            visctotfile.at(i) << time << "\t" << visc << endl;
+            visctotfile.at(i).close();
             cout << "#AT time " << time << endl;
             cout << "#VISCOTOT " << time << " " << visc << endl;
             combined.at(i).save_aggr_distribution(time);
@@ -287,7 +287,6 @@ int main() {
         // Writes r and vx values to file
         write_r_vx(params.getny(), t_step, radius);
     }
-    visctotfile.close();
 
     for (int i = 0; i <= params.getny(); i++) {
         combined.at(i).save_state();
