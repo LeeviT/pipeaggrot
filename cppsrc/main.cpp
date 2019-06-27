@@ -23,7 +23,7 @@ using namespace std;
 // The function needed by the sundials solver "return dt"
 // (get ydot at given t, y, and *userdata)
 int wfunc (realtype t, N_Vector y, N_Vector ydot, void* userdata) {
-    auto * combined_ptr = (Combo_class*) userdata;
+    auto * combined_ptr = (Combo_class *) userdata;
     combined_ptr->get_dt(NV_DATA_S(ydot), NV_DATA_S(y));
     return 0;
 }
@@ -154,6 +154,17 @@ input read_input_file() {
     return values;
 }
 
+// Sets modified viscosity values to viscosity vector each timestep
+// This will be the interface function to get viscosities from AO model
+vector<double> set_visc_vector(int ny, double visc) {
+    vector<double> visc_vector;
+
+    for (int i = 0; i <= ny; i++) {
+        visc_vector.push_back(visc);
+    }
+    return visc_vector;
+}
+
 // Initialize viscosities containing vector which points radially from the midpoint outwards
 // Viscosity is homogenous in the beginning, coming from the input file
 vector<double> init_visc_vector(int ny, double input_visc) {
@@ -165,16 +176,6 @@ vector<double> init_visc_vector(int ny, double input_visc) {
     return visc;
 }
 
-// Sets modified viscosity values to viscosity vector each timestep
-// This will be the interface function to get viscosities from AO model
-vector<double> set_visc_vector(int ny, double visc) {
-    vector<double> visc_vector;
-
-    for (int i = 0; i <= ny; i++) {
-        visc_vector.push_back(visc);
-    }
-    return visc_vector;
-}
 
 int main() {
     // Dummy variable for point class objects
@@ -187,7 +188,7 @@ int main() {
     vector<point> radius;
     double time = 0, shear_rate = 10.0, visc_raw_til, visc;
     int system_size;
-    // Initialize sundials stuff
+    // Initialize SUNDIALS stuff
     vector<void *> cvode_mem;
     vector<N_Vector> y0;
     vector<ofstream> visctotfile;
@@ -201,10 +202,10 @@ int main() {
             params.getshear_rate_max(), params.getNp_max());
     printf("theta_grid=%i, phi_grid=%i, classes=%i, what_todo=%i\n", params.gettheta_grid(), params.getphi_grid(),
             params.getclasses(), params.getwhat_todo());
-    printf("s1=%i, s2=%i, ny=%i, t0=%i, t_max=%i\n", params.gets1(), params.gets2(), params.getny(), params.gett0(),
-            params.gett_max());
+    printf("s1=%i, s2=%i, ny=%i, t0=%i, t_max=%i\n\n", params.gets1(), params.gets2(), params.getny(),
+            params.gett0(), params.gett_max());
 
-    // Allocate memory and initialize viscosity vector for the first timestep
+    // Allocate memory and initialize uniform viscosity vector for the first timestep
     visc_vector = init_visc_vector(params.getny() + 1, params.getvisc0());
 
     // Initialize radius and combined vectors, ny+1 points along radius of the pipe
@@ -215,10 +216,7 @@ int main() {
         visctotfile.emplace_back();
     }
 
-    // Initialize viscosity value based on the input viscosity
-    visc = params.getvisc0();
-
-    // Create ny population
+    // Create ny AO-populations
     for (int i = 0; i <= params.getny(); i++) {
         // Population system size in spherical coordinates
         system_size = (params.getphi_grid() + 1) * params.gettheta_grid() * params.getclasses();
@@ -247,51 +245,46 @@ int main() {
     // The main timestep loop
     for (int t_step = 0; t_step <= params.gett_max(); t_step++) {
         printf("t_step=%i of %i\n", t_step, params.gett_max());
-
-        // Set new viscosity values if not in the very first timestep
-        if (t_step > 0) { visc_vector = set_visc_vector(params.getny(), visc); }
+        cout << "time: " << time << endl;
 
         // Loop goes through the other points in y-direction, starting from the middle and sets the following
         // values for each discretization point
         for (int i = 0; i <= params.getny(); i++) {
             // If in y-midpoint of the pipe, r coordinate is zero, naturally
-            if (i == 0) {
-                r = 0.0;
-            } else {
-                r = ((double) i / params.getny()) * params.getR();
-            }
+            r = (i == 0) ? 0.0 : ((double) i / params.getny()) * params.getR();
             radius[i].setr(r);
             radius[i].setvisc(visc_vector[i]);
             radius[i].setx(1.0);
             radius[i].setvx(vx_pipe(radius[i], params.getdp(), params.getl(), params.getR()));
 
             // Update shear rate for the AO model
-            combined.at(i).update_shear_rate(radius[i].getvx());
+            combined[i].update_shear_rate(radius[i].getvx());
 
             // Some AO model solver stuff
-            CVode(cvode_mem.at(i), (time + params.getdt()), y0.at(i), &time, CV_NORMAL);
-            visc_raw_til = combined.at(i).get_visc_raw(params.gets1(), params.gets2()); //luetaan visc_raw muuttujaan
+            if (i == 0) { CVode(cvode_mem[i], time + params.getdt(), y0[i], &time, CV_NORMAL); }
+            else { CVode(cvode_mem[i], time, y0[i], &time, CV_NORMAL); }
+            visc_raw_til = combined[i].get_visc_raw(params.gets1(), params.gets2());
 
             // Compute total viscosity of the fluid
-            visc = params.getvisc0() + 2 * params.getvisc0() * visc_raw_til;  //Käytä: visc_raw Np_max visc0
+            visc_vector[i] = params.getvisc0() + 2 * params.getvisc0() * visc_raw_til;  //Käytä: visc_raw Np_max
 
             // Some printing stuff
-            visctotfile.at(i).open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
-            visctotfile.at(i) << time << "\t" << visc << endl;
-            visctotfile.at(i).close();
-            cout << "#AT time " << time << endl;
-            cout << "#VISCOTOT " << time << " " << visc << endl;
-            combined.at(i).save_aggr_distribution(time);
+            visctotfile[i].open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
+            visctotfile[i] << time << "\t" << visc_vector[i] << endl;
+            visctotfile[i].close();
+            cout << "r: " << radius[i].getr() << ", total visc: " << visc_vector[i] << ", v: "
+                 << radius[i].getvx() << endl;
+            combined[i].save_aggr_distribution(time);
         }
-
+        cout << " " << endl;
         // Writes r and vx values to file
         write_r_vx(params.getny(), t_step, radius);
     }
 
     for (int i = 0; i <= params.getny(); i++) {
-        combined.at(i).save_state();
-        N_VDestroy_Serial(y0.at(i));
-        CVodeFree(&cvode_mem.at(i));
+        combined[i].save_state();
+        N_VDestroy_Serial(y0[i]);
+        CVodeFree(&cvode_mem[i]);
     }
 
     return 0;

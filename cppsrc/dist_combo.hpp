@@ -47,7 +47,7 @@ public:
         update_v_aggregation(shear_rate);
     }
     ///INITIALIZE
-    void initialize(int wdist_size, double shear_rate=10, double beta=907.0, double shear_rate_max_=100.0)
+    void initialize(int wdist_size, double shear_rate, double beta, double shear_rate_max_)
     {  
         beta_now=beta;
         system_size=wdist_size;

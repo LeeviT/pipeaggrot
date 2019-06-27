@@ -21,10 +21,10 @@ private:
     int s1, s2;
     int runalready;
     ///Paramters of the system
-    double  k_aspect, diffusion_coeff, shear_rate;
+    double k_aspect, diffusion_coeff, shear_rate;
     ///The matrices 
     d2vec W_ij, W_ipj, W_imj, W_ijp, W_ijm, area;
-    int N,M; ///N -- phi size and  M theta size
+    int N, M; ///N -- phi size and  M theta size
     std::vector<double> phi, theta;
     double h_phi, h_theta, tot_area;
     ///Set k_aspect from aspect ratio
@@ -172,10 +172,10 @@ public:
     d2vec get_tau_raw(const d2vec_view1 &w_dist) {
         d2vec a4_D(boost::extents[3][3]);
         std::fill(a4_D.data(), a4_D.data() + a4_D.num_elements(), 0.0);
-        //define D
-        //D should be defined somewhere else
+        // define D
+        // D should be defined somewhere else
         double D[3][3] = {0.0};
-        D[s1][s2]=D[s2][s1] = shear_rate/2.0;
+        D[s1][s2] = D[s2][s1] = shear_rate/2.0;
         //get "a4" fourth order orientation tensor (function of w_dist)
         double a4[3][3][3][3] = {0.0};
         for (int phi_now = 0; phi_now != N; phi_now++) {
@@ -216,8 +216,8 @@ public:
         std::cout << "GET STRESS " << std::endl;
         double Np=300; //TODO:: put this somewhere else
         //D should be defined somewhere else
-        double D[3][3]={0.0}; 
-        D[s1][s2]=D[s2][s1]=shear_rate/2.0;
+        double D[3][3]={0.0};
+        D[s1][s2] = D[s2][s1] = shear_rate/2.0;
         d2vec a4_D=get_tau_raw(w_dist);
         d2vec stress(boost::extents[3][3]);
         //~ double pressure=0;

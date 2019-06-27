@@ -67,8 +67,7 @@ void Combo_class::get_dt(double* y_dot, double* y_now)
     if(classes>1)
     {
 	    multi_array_ref<double, 1>::array_view<1>::type tempView_dt=dist_dt[indices[range()][N][0]];
-        aggregation_class.get_wdist_dt(tempView_dt
-		, distribution[indices[range()][N][0]]);
+        aggregation_class.get_wdist_dt(tempView_dt, distribution[indices[range()][N][0]]);
     }
     //Copy the calculated dist_dt (multiarray) to y_dot ...
     memcpy (y_dot, dist_dt.data(), sizeof(double)*dist_dt.num_elements());
@@ -121,7 +120,11 @@ void Combo_class::save_state(){
 
 double Combo_class::get_visc_raw(int s1_, int s2_) {
     double visc_raw=get_tau_raw(s1_,s2_);
-    return (visc_raw/shear_rate);
+    if (shear_rate < 1e-4) {
+        return visc_raw / 1e-2;
+    } else {
+        return visc_raw / shear_rate;
+    }
 }
 
 ///THIS should give the stress part due to the orientation...
@@ -148,13 +151,13 @@ double Combo_class::get_tau_raw(int s1_, int s2_){
 			tau_raw[s1_][s2_]+= Npi*aggr_part;
 		}
     }
-    cout << "#TAURAW";
+    // cout << "#TAURAW";
     for(int j=0; j!=3; ++j) {
         for(int k=0;k!=3; ++k) {
-            cout << " " <<  tau_raw[j][k];
+            // cout << " " <<  tau_raw[j][k];
         }
     }
-    cout << endl;
+    // cout << endl;
     //~ cout << tau_raw[s1_][s2_];
     return tau_raw[s1_][s2_];
 }
@@ -180,7 +183,6 @@ void Combo_class::save_aggr_distribution(double time_now){
 	save_file << "\n\n";
 }
 
-//
 void Combo_class::update_shear_rate(double shear_rate_t) {
     shear_rate = shear_rate_t;
 }

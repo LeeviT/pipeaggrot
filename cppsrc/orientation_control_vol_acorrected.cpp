@@ -154,34 +154,33 @@ void Orientation_ao::initialize_abcde()
 //----------------------------------------------------------------------
 ///PUBLIC FUNCTIONS::
 //Initialize 
-void Orientation_ao::initialize(const double aspect_ratio, 
-     double set_shear_rate, double set_diffusion_coeff, int N_, int M_, int s1_, int s2_)
-{
-    runalready=0; //this is for deciding whether to create new files or append
-    s1=s1_; 
-    s2=s2_;
-    M=M_; N=N_; //system size
-    h_phi=2*PI/N;
+void Orientation_ao::initialize(const double aspect_ratio, double set_shear_rate, double set_diffusion_coeff,
+                                int N_, int M_, int s1_, int s2_) {
+    runalready = 0; //this is for deciding whether to create new files or append
+    s1 = s1_;
+    s2 = s2_;
+    M = M_; N = N_; //system size
+    h_phi = 2*PI/N;
     phi.resize(N);
-    for(int i=0; i!=N; ++i)
-        phi[i]=i*h_phi + 0.5*h_phi;
-    h_theta=PI/(M);
+    for(int i = 0; i != N; i++)
+        phi[i] = i*h_phi + 0.5*h_phi;
+    h_theta = PI/(M);
     theta.resize(M);
-    for(int i=0; i!=M; ++i){
+    for(int i = 0; i != M; i++) {
         theta[i] = h_theta*i + 0.5*h_theta;
     }
-    shear_rate=set_shear_rate; //shear rate
+    shear_rate = set_shear_rate; //shear rate
     set_k_aspect(aspect_ratio); //aspect ratio initialization
     diffusion_coeff = set_diffusion_coeff; //diffusion coefficient
     initialize_abcde(); //Create operator matrices
     return; 
 }
 //Return an approximately uniform distribution
-d2vec Orientation_ao::get_uniform_dist(){
+d2vec Orientation_ao::get_uniform_dist() {
     d2vec w_uniform(extents[N][M]);
-    for(int i=0; i!=N; ++i){
-        for(int j=0; j!=M; ++j){
-            w_uniform[i][j]=1/(tot_area);
+    for(int i = 0; i != N; i++) {
+        for(int j = 0; j != M; j++) {
+            w_uniform[i][j] = 1.0/(tot_area);
         }
     }
     return w_uniform;
