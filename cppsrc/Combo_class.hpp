@@ -4,11 +4,13 @@
 #include "orientation_control_vol.hpp"
 // #include "orientation_combo.hpp"
 #include "dist_combo.hpp"
+#include "point.hpp"
+#include "io.hpp"
 #include <vector>
 
 typedef boost::multi_array<double, 3>  d3vec;
 
-class Combo_class{
+class Combo_class {
     double shear_rate, diffusion_coeff_max, visco0, Np_max, beta;
     int classes, M, N;
     double d_classes; 
@@ -18,8 +20,7 @@ class Combo_class{
     std::vector<Orientation_ao> orientation_class;
     public:
     ///INITIALIZE
-    void initialize(double aspect_ratio, double shear_rate_, double diffusion_coeff_, int classes_, int N_, int M_,
-            int s1, int s2, int what_todo, double visco0_, double Np_max_, double beta_now, double shear_rate_max);
+    void initialize(double shear_rate_, input params);
     ///GET DT
     void get_dt(double* y_dot, double* y_now);
     ///SET INITIAL UNIFORM STATE
@@ -33,8 +34,8 @@ class Combo_class{
     ///Get tau raw
     double get_tau_raw(int i1_, int i2_);
     ///Get tot prob
-    void get_tot_prob(double time_now=-1.0);
-	void save_aggr_distribution(double time_now=-1.0);
+    void get_tot_prob(double time_now = -1.0);
+	void save_aggr_distribution(double time_now = -1.0);
     void update_shear_rate(double shear_rate);
 
     //EVERYTHING BELOW NEEDS CHECKING
@@ -55,7 +56,6 @@ class Combo_class{
     //DEBUGING...
     void get_a4_comp();
 */
-
 };
 
 #endif
