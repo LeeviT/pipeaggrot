@@ -116,8 +116,8 @@ int main() {
     }
 
     // The main timestep loop
-    for (int timestep = 0; timestep <= params.gett_max(); timestep++) {
-        printf("t_step=%i of %i\n", timestep, params.gett_max());
+    for (int t_step = 0; t_step <= params.gett_max(); t_step++) {
+        printf("t_step=%i of %i\n", t_step, params.gett_max());
         cout << "time: " << time << endl;
 
         // Loop goes through the other points in y-direction, starting from the middle and sets the following
@@ -128,7 +128,7 @@ int main() {
             radius[i].setr(r);
             radius[i].setvisc(visc_vector[i]);
             radius[i].setx(1.0);
-            radius[i].setvx(vx_pipe(radius[i], params, bessel_zeros, J_1_values, J_0_values, i, timestep));
+            radius[i].setvx(vx_pipe(radius[i], params, bessel_zeros, J_1_values, J_0_values, i, t_step));
 
             // Update shear rate for the AO model
             combined[i].update_shear_rate(radius[i].getvx());
@@ -136,7 +136,7 @@ int main() {
             // Some AO model solver stuff
             if (i == 0) { CVode(cvode_mem[i], time + params.getdt(), y0[i], &time, CV_NORMAL); }
             else { CVode(cvode_mem[i], time, y0[i], &time, CV_NORMAL); }
-            visc_raw_til = combined[i].get_visc_raw(params.gets1(), params.gets2(), timestep, i);
+            visc_raw_til = combined[i].get_visc_raw(params.gets1(), params.gets2(), t_step);
 
             // Compute total viscosity of the fluid
             visc_vector[i] = params.getvisc0() + 2 * params.getvisc0() * visc_raw_til;
@@ -151,7 +151,7 @@ int main() {
         }
         cout << " " << endl;
         // Writes r and vx values to file
-        write_r_vx(params.getny(), timestep, radius);
+        write_r_vx(params.getny(), t_step, radius);
     }
 
     for (int i = 0; i <= params.getny(); i++) {

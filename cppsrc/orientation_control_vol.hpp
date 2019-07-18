@@ -82,8 +82,8 @@ public:
     
     ///Print the current distribution 
     ///TODO take the output stream as input parameter
-    template <class d2vec_view1> void shoutbox(const d2vec_view1 &w_dist_, int file_index_, int timestep);
-    template <class d2vec_view1> void dist_avgs(const d2vec_view1 &w_dist_, int file_index_, int timestep);
+    template <class d2vec_view1> void shoutbox(const d2vec_view1 &w_dist_, int file_index_, int timestep_);
+    template <class d2vec_view1> void dist_avgs(const d2vec_view1 &w_dist_, int file_index_, int timestep_);
 
     template <class d2vec_view1> double get_Np(const d2vec_view1 &dist_now_);
 
