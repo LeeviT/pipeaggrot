@@ -17,7 +17,8 @@ public:
     triple():x(0.0), y(0.0), z(0.0){}
     triple(const double &phi_, const double &theta_){transform(phi_,theta_);}
     triple(const double &first_, const double &second_, const double &third_):x(first_), y(second_), z(third_){}
-    ///tranform() -- get "phi,theta,r" from current "x,y,z"
+
+    //transform() -- get "phi,theta,r" from current "x,y,z"
     triple& transform() {
          //~ r = sqrt(x*x + y*y + z*z);
         r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
@@ -33,7 +34,8 @@ public:
         }
         return * this;
     }
-    ///transform(phi,theta) -- get "x,y,z" from "phi,theta" and r=1
+
+    // transform(phi,theta) -- get "x,y,z" from "phi,theta" and r=1
     void transform(const double &phi_, const double &theta_) {
         phi = phi_;
         theta = theta_;
@@ -41,7 +43,8 @@ public:
         y = sin(theta_)*sin(phi_);
         z = cos(theta_);
     }
-    ///add_r(r) if you need also r setted -OBS! Assumes r now == 1. 
+
+    // Add_r(r) if you need also r setted -OBS! Assumes r now == 1.
     triple& add_r(const double &r_) {
         r = r_;
         x *= r;
@@ -49,21 +52,24 @@ public:
         z *= r;
         return * this;
     }
-    ///transform_to_xyz() -- get "x,y,z" from current "phi,theta,r"
+
+    // transform_to_xyz() -- get "x,y,z" from current "phi,theta,r"
     triple& transform_to_xyz() {
-        transform(phi,theta);
+        transform(phi, theta);
         add_r(r);
         return * this;
     }
+
     void shoutbox() {
         std::cout << x << " " << y << " " << z << " " << std::endl;
     }
+
     std::ofstream & shoutbox_file(std::ofstream &outfile) {
         outfile << x << " " << y << " " << z << " " << std::endl;
         return outfile;
     }
     
-    ///+= operator works in "xyz" but calls transform() afterwords 
+    //+= operator works in "xyz" but calls transform() afterwords
     triple& operator +=(const triple& add_this) {
         x += add_this.x;
         y += add_this.y;

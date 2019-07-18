@@ -22,29 +22,29 @@ using namespace std;
 
 
 // Calcute m zeros of the first kind Bessel functions of order n=1
-vector<double> calc_bessel_zeros(int n) {
-    vector<double> zeros(n);
+vector<double> calc_bessel_zeros(int n_) {
+    vector<double> _zeros(n_);
 
     // Note that cyl_bessel_j_zero() starts iterator indexing from 1, i.e. zeros[0] would cause segfault
-    boost::math::cyl_bessel_j_zero<double>(0.0, 1, n, zeros.begin());
-    return zeros;
+    boost::math::cyl_bessel_j_zero<double>(0.0, 1, n_, _zeros.begin());
+    return _zeros;
 }
 
 // Calculate the Bessel function of the first kind of order zero values at points λ_n*(r/R)
-vector<vector<double>> J_0(int ny, vector<double> bessel_zeros) {
-    vector<vector<double>> values(ny+1);
+vector<vector<double>> J_0(int ny_, vector<double> bessel_zeros_) {
+    vector<vector<double>> _values(ny_ + 1);
 
     // First initialize J_0(λ) vectors for each r/R value
-    for (int i = 0; i <= ny; i++) {
-        values[i].resize(bessel_zeros.size());
+    for (int i = 0; i <= ny_; i++) {
+        _values[i].resize(bessel_zeros_.size());
     }
     // Now assign J_0(λ_n*(r/R)) values to J_0(λ) vectors
-    for (int i = 0; i <= ny; i++) {
-        for (int j = 0; j < bessel_zeros.size(); j++) {
-            values[i][j] = boost::math::cyl_bessel_j<double>(0, bessel_zeros[j]*(((double) i)/((double) ny)));
+    for (int i = 0; i <= ny_; i++) {
+        for (int j = 0; j < bessel_zeros_.size(); j++) {
+            _values[i][j] = boost::math::cyl_bessel_j<double>(0, bessel_zeros_[j]*(((double) i)/((double) ny_)));
         }
     }
-    return values;
+    return _values;
 }
 
 // Calculate the Bessel function of the first kind of order one values at points λ_n

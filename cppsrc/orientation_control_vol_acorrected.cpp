@@ -358,7 +358,7 @@ template <class d2vec_view1> double Orientation_ao::get_visc_part(d2vec_view1 &w
 template <class d2vec_view1> void Orientation_ao::normalize(d2vec_view1 &w_dist_) {
     double _tot_prob = 0.0;
     for (int phi_now = 0; phi_now < N; phi_now++) {
-        for (int theta_now = 0; theta_now < M; theta_now++){
+        for (int theta_now = 0; theta_now < M; theta_now++) {
             _tot_prob += w_dist_[phi_now][theta_now] * area[phi_now][theta_now];
         }
     }
@@ -369,7 +369,7 @@ template <class d2vec_view1> double Orientation_ao::get_tot_prob(d2vec_view1 &w_
     double _tot_prob = 0.0;
     for (int phi_now = 0; phi_now < N; phi_now++) {
         for (int theta_now = 0; theta_now < M; theta_now++) {
-            _tot_prob += _w_dist[phi_now][theta_now] * area[phi_now][theta_now];
+            _tot_prob += w_dist_[phi_now][theta_now] * area[phi_now][theta_now];
         }
     }
     return _tot_prob;
@@ -392,8 +392,9 @@ void Orientation_ao::area_test() {
 
 // Print the current distribution
 // TODO: take the output stream as input parameter
-template <class d2vec_view1> void Orientation_ao::shoutbox(const d2vec_view1 &w_dist_, int file_index_) {
+template <class d2vec_view1> void Orientation_ao::shoutbox(const d2vec_view1 &w_dist_, int file_index_, int timestep_) {
     std::stringstream _filename;
+    // _filename << "class_" << file_index_ << "_t_" << timestep_ << ".dat";
     _filename << "class_" << file_index_ << ".dat";
     std::ofstream _outfile;
     if (!runalready) _outfile.open(_filename.str().c_str());
@@ -401,20 +402,42 @@ template <class d2vec_view1> void Orientation_ao::shoutbox(const d2vec_view1 &w_
     runalready++;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            triple _tmp(phi[i],theta[j]);
+            triple _tmp(phi[i], theta[j]);
             _tmp.add_r(w_dist_[i][j] / (4 * PI));
-            _tmp.shoutbox_file(_outfile);
+            // _tmp.shoutbox_file(_outfile);
         }
-        _outfile <<"\n";
+        _outfile << "\n";
     }
     // Print first again in order to get grid in gnuplot
     for (int j = 0; j < M; j++) {
-        triple _tmp(phi[0],theta[j]);
+        triple _tmp(phi[0], theta[j]);
         _tmp.add_r(w_dist_[0][j] / (4 * PI));
         _tmp.shoutbox_file(_outfile);
     }
     _outfile << "\n";
     _outfile << std::endl;
+}
+
+// Print average theta and phi values of the distribution
+template <class d2vec_view1> void Orientation_ao::dist_avgs(const d2vec_view1 &w_dist_, int file_index_,
+                                                            int timestep_) {
+    std::stringstream _filename;
+    // _filename << "dist/class_" << file_index_ << "_" << timestep_ << ".dat";
+    _filename << "dist/class_" << file_index_ << ".dat";
+    std::ofstream _outfile;
+    // _outfile.open(_filename.str().c_str());
+    _outfile.open(_filename.str().c_str(), std::ios::out | std::ios::app);
+    runalready++;
+    double phi_sum = 0.0, theta_sum = 0.0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            // _outfile << w_dist_[i][j] / (4 * PI) << "\t" << phi[i] << "\t" << theta[j] << std::endl;
+            // _outfile << w_dist_[i][j] * phi[i] * (4 * PI) << "\t" << w_dist_[i][j] * theta[j] * (4 * PI) << endl;
+            phi_sum += w_dist_[i][j] * phi[i] * (4 * PI);
+            theta_sum += w_dist_[i][j] * theta[i] * (4 * PI);
+        }
+    }
+    _outfile << timestep_ << "\t" << phi_sum / (20.0 * 20.0) << "\t" << theta_sum / (20.0 * 20.0) << endl;
 }
 
 template <class d2vec_view1> double Orientation_ao::get_Np(const d2vec_view1 &dist_now_) {
@@ -570,24 +593,26 @@ void Orientation_ao::selfcheck() {
 }
 
 template void Orientation_ao::get_dw_dt<boost::detail::multi_array::multi_array_view<double, 2>>
-              (d2vec_view&, const d2vec_view&);
+              (d2vec_view&_, const d2vec_view&);
 template void Orientation_ao::normalize<boost::detail::multi_array::multi_array_view<double, 2>>
-              (d2vec_view&);
+              (d2vec_view&_);
 template void Orientation_ao::shoutbox<boost::detail::multi_array::multi_array_view<double, 2>>
-              (const d2vec_view&, int file_index);
+              (const d2vec_view&_, int file_index_, int timestep_);
+template void Orientation_ao::dist_avgs<boost::detail::multi_array::multi_array_view<double, 2>>
+        (const d2vec_view&_, int file_index_, int timestep_);
 template double Orientation_ao::get_a2<boost::detail::multi_array::multi_array_view<double, 2>>
-                (const d2vec_view&, int index_1, int index_2);
+                (const d2vec_view&_, int index_1_, int index_2_);
 template double Orientation_ao::get_a4_comp<boost::detail::multi_array::multi_array_view<double, 2>>
-                (const d2vec_view&);
+                (const d2vec_view&_);
 template double Orientation_ao::get_visc_part<boost::detail::multi_array::multi_array_view<double, 2>>
-                (d2vec_view&);
+                (d2vec_view&_);
 template double Orientation_ao::get_tot_prob<boost::detail::multi_array::multi_array_view<double, 2>>
-                (d2vec_view&);
+                (d2vec_view&_);
 template double Orientation_ao::get_C<boost::detail::multi_array::multi_array_view<double, 2>>
-                (d2vec_view&);
+                (d2vec_view&_);
 template double Orientation_ao::get_Np<boost::detail::multi_array::multi_array_view<double, 2>>
-                (const d2vec_view&);
+                (const d2vec_view&_);
 template d2vec Orientation_ao::get_tau_raw<boost::detail::multi_array::multi_array_view<double, 2>>
-               (const d2vec_view&, double shear_rate_t);
+               (const d2vec_view&_, double shear_rate_);
 template d2vec Orientation_ao::get_stress1<boost::detail::multi_array::multi_array_view<double, 2>>
-               (const d2vec_view&);
+               (const d2vec_view&_);

@@ -13,14 +13,14 @@
 using namespace std;
 
 // Setter functions for each variable
-void input::setdp(double dp) { input::dp = dp; }
-void input::setl(double l) { input::l = l; }
-void input::setvisc0(double visc0) { input::visc0 = visc0; }
-void input::setR(double R) { input::R = R; }
-void input::setdt(double dt) { input::dt = dt; }
-void input::setdiff_coeff(double diff_coeff) { input::diff_coeff = diff_coeff; }
-void input::setaspect_ratio(double aspect_ratio) { input::aspect_ratio = aspect_ratio; }
-void input::setbeta(double beta) { input::beta = beta;}
+void input::setdp(double dp_) { dp = dp_; }
+void input::setl(double l_) { l = l_; }
+void input::setvisc0(double visc0_) { visc0 = visc0_; }
+void input::setR(double R_) { R = R_; }
+void input::setdt(double dt_) { dt = dt_; }
+void input::setdiff_coeff(double diff_coeff_) { diff_coeff = diff_coeff_; }
+void input::setaspect_ratio(double aspect_ratio_) { aspect_ratio = aspect_ratio_; }
+void input::setbeta(double beta_) { beta = beta_;}
 void input::setshear_rate_max(double shear_rate_max) { input::shear_rate_max = shear_rate_max; }
 void input::setNp_max(double Np_max) { input::Np_max = Np_max; }
 void input::settheta_grid(int theta_grid) { input::theta_grid = theta_grid; }

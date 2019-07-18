@@ -14,10 +14,10 @@ public:
     void print_values();
 
     // Setter functions for each variable
-    void setx(double x);
-    void setr(double r);
-    void setvisc(double visc);
-    void setvx(double vx);
+    void setx(double x_);
+    void setr(double r_);
+    void setvisc(double visc_);
+    void setvx(double vx_);
 
     // Getter functions for each variable
     double getx();

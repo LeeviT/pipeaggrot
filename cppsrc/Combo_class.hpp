@@ -2,11 +2,10 @@
 #define COMBOCLASS_AO_2012
 
 #include "orientation_control_vol.hpp"
-// #include "orientation_control_vol_acorrected.cpp"
-// #include "orientation_combo.hpp"
 #include "dist_combo.hpp"
 #include "point.hpp"
 #include "io.hpp"
+
 #include <vector>
 
 typedef boost::multi_array<double, 3>  d3vec;
@@ -21,42 +20,23 @@ class Combo_class {
     std::vector<Orientation_ao> orientation_class;
     public:
     ///INITIALIZE
-    void initialize(double shear_rate_, input params);
+    void initialize(double shear_rate_, input params_);
     ///GET DT
-    void get_dt(double* y_dot, double* y_now);
+    void get_dt(double * y_dot_, double * y_now_);
     ///SET INITIAL UNIFORM STATE
-    void set_uniform_state(double* y_now);
+    void set_uniform_state(double * y_now_);
     ///LOAD STATE
-    void load_state(double* y_now);
+    void load_state(double * y_now_);
     ///SAVE THE CURRENT STATE
     void save_state();
     ///Get visc raw
-    double get_visc_raw(int i1_, int i2_);
+    double get_visc_raw(int i1_, int i2_, int timestep_, int r_i_);
     ///Get tau raw
     double get_tau_raw(int i1_, int i2_);
     ///Get tot prob
-    void get_tot_prob(double time_now = -1.0);
-	void save_aggr_distribution(double time_now = -1.0);
-    void update_shear_rate(double shear_rate);
-
-    //EVERYTHING BELOW NEEDS CHECKING
-/*
-    ///NOT NEEDED YET
-    ///PRINT CURRENT STATE --- should be improved
-    void print_out();
-    ///SHOUTBOX PRINTOUT MODE
-    void shoutbox();
-    ///GET visc part
-    void get_visc_part(double time);
-    ///GET visc full
-    double get_visc_tot(int s1_, int s2_);
-    ///GET A2 part
-    void get_a2_(int index1, int index2, double time_);
-    ///Get the size distribution (piecewise for each class)
-    void get_C();
-    //DEBUGING...
-    void get_a4_comp();
-*/
+    void get_tot_prob(double time_now_ = -1.0);
+	void save_aggr_distribution(double time_now_ = -1.0);
+    void update_shear_rate(double shear_rate_);
 };
 
 #endif
