@@ -20,17 +20,15 @@ public:
 
     //transform() -- get "phi,theta,r" from current "x,y,z"
     triple& transform() {
-         //~ r = sqrt(x*x + y*y + z*z);
         r = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
         //~ if(r<1e-8){phi=0;theta=0;  
         if (r < 1e-30) {
             phi = 0; theta = 0;
-            //~ std::cerr << "x " << x << " y " << y << " z "  << z << std::endl;
         }
         else {
             phi = atan2(y, x);
-            if (phi < 0) phi += 2*PI;
-            theta = acos(z/r);    
+            if (phi < 0) phi += 2 * PI;
+            theta = acos(z / r);
         }
         return * this;
     }
@@ -64,16 +62,16 @@ public:
         std::cout << x << " " << y << " " << z << " " << std::endl;
     }
 
-    std::ofstream & shoutbox_file(std::ofstream &outfile) {
-        outfile << x << " " << y << " " << z << " " << std::endl;
-        return outfile;
+    std::ofstream & shoutbox_file(std::ofstream &outfile_) {
+        outfile_ << x << " " << y << " " << z << " " << std::endl;
+        return outfile_;
     }
     
     //+= operator works in "xyz" but calls transform() afterwords
-    triple& operator +=(const triple& add_this) {
-        x += add_this.x;
-        y += add_this.y;
-        z += add_this.z;
+    triple& operator +=(const triple& add_this_) {
+        x += add_this_.x;
+        y += add_this_.y;
+        z += add_this_.z;
         transform();
         return * this;
     }

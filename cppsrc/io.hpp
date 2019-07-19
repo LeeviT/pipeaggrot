@@ -13,25 +13,25 @@ private:
     int theta_grid, phi_grid, classes, what_todo, s1, s2, ny, t0, t_max;
 public:
     // Setter functions for each variable
-    void setdp(double dp);
-    void setl(double l);
-    void setvisc0(double visc0);
-    void setR(double R);
-    void setdt(double dt);
-    void setdiff_coeff(double diff_coeff);
-    void setaspect_ratio(double aspect_ratio);
-    void setbeta(double beta);
-    void setshear_rate_max(double shear_rate_max);
-    void setNp_max(double Np_max);
-    void settheta_grid(int theta_grid);
-    void setphi_grid(int phi_grid);
-    void setclasses(int classes);
-    void setwhat_todo(int what_todo);
-    void sets1(int s1);
-    void sets2(int s2);
-    void setny(int ny);
-    void sett0(int t0);
-    void sett_max(int t_max);
+    void setdp(double dp_);
+    void setl(double l_);
+    void setvisc0(double visc0_);
+    void setR(double R_);
+    void setdt(double dt_);
+    void setdiff_coeff(double diff_coeff_);
+    void setaspect_ratio(double aspect_ratio_);
+    void setbeta(double beta_);
+    void setshear_rate_max(double shear_rate_max_);
+    void setNp_max(double Np_max_);
+    void settheta_grid(int theta_grid_);
+    void setphi_grid(int phi_grid_);
+    void setclasses(int classes_);
+    void setwhat_todo(int what_todo_);
+    void sets1(int s1_);
+    void sets2(int s2_);
+    void setny(int ny_);
+    void sett0(int t0_);
+    void sett_max(int t_max_);
 
     // Getter functions for each variable
     double getdp() const;
@@ -59,6 +59,6 @@ public:
 };
 
 // Function writing r and x-velo values to file
-void write_r_vx(int ny, int t_step, vector<point> radius);
+void write_r_vx(int ny_, int t_step_, vector<point> radius_);
 
 #endif

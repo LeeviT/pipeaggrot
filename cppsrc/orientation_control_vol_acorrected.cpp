@@ -419,8 +419,7 @@ template <class d2vec_view1> void Orientation_ao::shoutbox(const d2vec_view1 &w_
 }
 
 // Print average theta and phi values of the distribution
-template <class d2vec_view1> void Orientation_ao::dist_avgs(const d2vec_view1 &w_dist_, int file_index_,
-                                                            int timestep_) {
+template <class d2vec_view1> void Orientation_ao::dist_avgs(const d2vec_view1 &w_dist_, int file_index_, int timestep_) {
     std::stringstream _filename;
     // _filename << "dist/class_" << file_index_ << "_" << timestep_ << ".dat";
     _filename << "dist/class_" << file_index_ << ".dat";
@@ -428,16 +427,14 @@ template <class d2vec_view1> void Orientation_ao::dist_avgs(const d2vec_view1 &w
     // _outfile.open(_filename.str().c_str());
     _outfile.open(_filename.str().c_str(), std::ios::out | std::ios::app);
     runalready++;
-    double phi_sum = 0.0, theta_sum = 0.0;
+    double _phi_sum = 0.0, _theta_sum = 0.0;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            // _outfile << w_dist_[i][j] / (4 * PI) << "\t" << phi[i] << "\t" << theta[j] << std::endl;
-            // _outfile << w_dist_[i][j] * phi[i] * (4 * PI) << "\t" << w_dist_[i][j] * theta[j] * (4 * PI) << endl;
-            phi_sum += w_dist_[i][j] * phi[i] * (4 * PI);
-            theta_sum += w_dist_[i][j] * theta[i] * (4 * PI);
+            _phi_sum += w_dist_[i][j] * phi[i] * (4 * PI);
+            _theta_sum += w_dist_[i][j] * theta[i] * (4 * PI);
         }
     }
-    _outfile << timestep_ << "\t" << phi_sum / (20.0 * 20.0) << "\t" << theta_sum / (20.0 * 20.0) << endl;
+    _outfile << timestep_ << "\t" << _phi_sum / (20.0 * 20.0) << "\t" << _theta_sum / (20.0 * 20.0) << endl;
 }
 
 template <class d2vec_view1> double Orientation_ao::get_Np(const d2vec_view1 &dist_now_) {

@@ -48,37 +48,38 @@ vector<vector<double>> J_0(int ny_, vector<double> bessel_zeros_) {
 }
 
 // Calculate the Bessel function of the first kind of order one values at points λ_n
-vector<double> J_1(vector<double> bessel_zeros) {
-    vector<double> values(bessel_zeros.size());
+vector<double> J_1(vector<double> bessel_zeros_) {
+    vector<double> _values(bessel_zeros_.size());
 
     // Calculate J_1(λ_n) values
-    for (int i = 0; i < bessel_zeros.size(); i++) {
-        values[i] = boost::math::cyl_bessel_j<double>(1, bessel_zeros[i]);
+    for (int i = 0; i < bessel_zeros_.size(); i++) {
+        _values[i] = boost::math::cyl_bessel_j<double>(1, bessel_zeros_[i]);
     }
-    return values;
+    return _values;
 }
 
 // Calculate value of Fourier-Bessel series for each r value
-double fourier_bessel(vector<double> bessel_zeros, vector<double> J_1_values, vector<vector<double>> J_0_values,
-                      int r_i, int t_step, input params, double visc) {
-    double sum = 0.0, dens = 1.0, partsum = 0.0;
+double fourier_bessel(vector<double> bessel_zeros_, vector<double> J_1_values_, vector<vector<double>> J_0_values_,
+                      int r_i_, int t_step_, input params_, double visc_) {
+    double _sum = 0.0, _dens = 1.0, _partsum = 0.0;
 
-    for (int i = 0; i < bessel_zeros.size(); i++) {
-        partsum += J_0_values[r_i][i] / (J_1_values[i]*pow(bessel_zeros[i], 3));
-        sum += (1.0/pow(bessel_zeros[i], 3)) * (J_0_values[r_i][i] / J_1_values[i])
-               * exp(-pow(bessel_zeros[i], 2)*((visc/dens) * (params.getdt()*(double) t_step))/pow(params.getR(), 2));
+    for (int i = 0; i < bessel_zeros_.size(); i++) {
+        _partsum += J_0_values_[r_i_][i] / (J_1_values_[i] * pow(bessel_zeros_[i], 3));
+        _sum += (1.0/pow(bessel_zeros_[i], 3)) * (J_0_values_[r_i_][i] / J_1_values_[i])
+              * exp(-pow(bessel_zeros_[i], 2) *((visc_ / _dens) * (params_.getdt()*(double) t_step_))
+              / pow(params_.getR(), 2));
     }
-    sum = 2*sum*params.getdp()*pow(params.getR(), 2)*params.getR()/(params.getl()*visc);
+    _sum = 2 * _sum * params_.getdp() * pow(params_.getR(), 2) * params_.getR() / (params_.getl() * visc_);
 
-    return sum;
+    return _sum;
 }
 
 // Function to calculate fluid x-velocity in a single point in the pipe
-double vx_pipe(point single_point, input params, vector<double> bessel_zeros, vector<double> J_1,
-               vector<vector<double>> J_0, int r_i, int t_step) {
+double vx_pipe(point single_point_, input params_, vector<double> bessel_zeros_, vector<double> J_1_,
+               vector<vector<double>> J_0_, int r_i_, int t_step_) {
 
-    double fb_sum = fourier_bessel(move(bessel_zeros), move(J_1), move(J_0), r_i, t_step,
-                                   params, single_point.getvisc());
-    return ((params.getdp()/(4* single_point.getvisc()*params.getl()))*(pow(params.getR(), 2) -
-            pow(single_point.getr(), 2))) - fb_sum;
+    double _fb_sum = fourier_bessel(move(bessel_zeros_), move(J_1_), move(J_0_), r_i_, t_step_,
+                                    params_, single_point_.getvisc());
+    return ((params_.getdp() / (4 * single_point_.getvisc() * params_.getl())) * (pow(params_.getR(), 2) -
+            pow(single_point_.getr(), 2))) - _fb_sum;
 }
