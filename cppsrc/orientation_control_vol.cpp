@@ -4,8 +4,11 @@
 
 #include "orientation_control_vol.hpp"
 #include "boost/multi_array.hpp"
+
 #include <vector>
+#include <chrono>
 #include <math.h>
+
 #include "triple.hpp"
 #define PI  3.14159265358979323846
 
@@ -112,26 +115,23 @@ void Orientation_ao::initialize_abcde(double shear_rate_) {
             _theta_m = theta[j] - 0.5*h_theta;
             // Area is exactly given by this formulation:
             area[i][j] = h_phi * fabs(cos(_theta_m) - cos(_theta_p));
-            if (_theta_m < PI/2 && _theta_p > PI/2)
+            if (_theta_m < PI/2 && _theta_p > PI/2) {
                 area[i][j] = h_phi * (2 - (1 - fabs(cos(_theta_m))) - (1 - fabs(cos(_theta_p))));
-                // Orientation part (same below)
-                W_ipj[i][j] = (-sin(_theta) / 2 * dot_p_angles(_phi_p, _theta, shear_rate_).second / sin(_theta)
-                // Diffusion/aggregation part (same below)
-                + diffusion_coeff / (sin(_theta) * h_phi))
-                * (h_theta / area[i][j]);
-                W_imj[i][j] = (sin(_theta) / 2 * dot_p_angles(_phi_m, _theta, shear_rate_).second / sin(_theta)
-                + diffusion_coeff / (sin(_theta) * h_phi))
-                * (h_theta / area[i][j]);
+            }
+            // Orientation part (same below)
+            W_ipj[i][j] = (-sin(_theta) / 2 * dot_p_angles(_phi_p, _theta, shear_rate_).second / sin(_theta)
+            // Diffusion/aggregation part (same below)
+            + diffusion_coeff / (sin(_theta) * h_phi)) * (h_theta / area[i][j]);
+            W_imj[i][j] = (sin(_theta) / 2 * dot_p_angles(_phi_m, _theta, shear_rate_).second / sin(_theta)
+            + diffusion_coeff / (sin(_theta) * h_phi)) * (h_theta / area[i][j]);
             W_ijp[i][j] = (-sin(_theta_p) / 2 * dot_p_angles(_phi, _theta, shear_rate_).first
-                + diffusion_coeff * sin(_theta_p) / h_theta )
-                * (h_phi / area[i][j]);
+            + diffusion_coeff * sin(_theta_p) / h_theta ) * (h_phi / area[i][j]);
             W_ijm[i][j] = (sin(_theta_m) / 2 * dot_p_angles(_phi, _theta_m, shear_rate).first
-                + diffusion_coeff * sin(_theta_m) / h_theta)
-                * (h_phi / area[i][j]);
+            + diffusion_coeff * sin(_theta_m) / h_theta) * (h_phi / area[i][j]);
             W_ij[i][j] = W_ijp[i][j] +  W_ijm[i][j] + W_ipj[i][j] + W_imj[i][j]
-                - 2 * diffusion_coeff * sin(_theta_m) * h_phi / (h_theta * area[i][j])
-                - 2 * diffusion_coeff * sin(_theta_p) * h_phi / (h_theta * area[i][j])
-                - 4 * diffusion_coeff * h_theta / (sin(_theta) * h_phi * area[i][j]);
+            - 2 * diffusion_coeff * sin(_theta_m) * h_phi / (h_theta * area[i][j])
+            - 2 * diffusion_coeff * sin(_theta_p) * h_phi / (h_theta * area[i][j])
+            - 4 * diffusion_coeff * h_theta / (sin(_theta) * h_phi * area[i][j]);
             tot_area += area[i][j];
         }
     }
@@ -159,6 +159,7 @@ void Orientation_ao::initialize(const double aspect_ratio_, double shear_rate_, 
     diffusion_coeff = diffusion_coeff_; // diffusion coefficient
     initialize_abcde(shear_rate_);
 }
+
 // Return an approximately uniform distribution
 d2vec Orientation_ao::get_uniform_dist() {
     d2vec _w_uniform(extents[N][M]);
@@ -169,6 +170,7 @@ d2vec Orientation_ao::get_uniform_dist() {
     }
     return _w_uniform;
 }
+
 // Get dw_dt --- in header...
 // Template function here because of "array_view reference" != "array reference"
 // Functions defined in header ...
@@ -178,7 +180,14 @@ d2vec Orientation_ao::get_uniform_dist() {
 template <class d2vec_view1> void Orientation_ao::get_dw_dt(d2vec_view1 &dw_, const d2vec_view1 &w_old_) {
     int _im1, _ip1, _jm1, _jp1;
     for (int i = 0; i < N; i++) {
-        _im1 = i - 1; _ip1 = i + 1; if(!i) _im1 = N - 1; else if(i == N - 1) _ip1 = 0;
+        _im1 = i - 1; _ip1 = i + 1;
+
+        if (!i) {
+            _im1 = N - 1;
+        } else if (i == N - 1) {
+            _ip1 = 0;
+        }
+
         for (int j = 1; j < M - 1; j++) {
             _jm1 = j - 1; _jp1 = j + 1;
             dw_[i][j] += w_old_[i][j] * W_ij[i][j] + w_old_[i][_jp1] * W_ijp[i][j]
@@ -278,12 +287,14 @@ template <class d2vec_view1> double Orientation_ao::get_a4_comp(const d2vec_view
 // since we need w_dist, this is currently a template function ..
 template <class d2vec_view1> d2vec Orientation_ao::get_tau_raw(const d2vec_view1 &w_dist_, double shear_rate_) {
     d2vec _a4_D(boost::extents[3][3]);
-    std::fill(_a4_D.data(), _a4_D.data() + _a4_D.num_elements(), 0.0);
     // D should be defined somewhere else
-    double _D[3][3] = {0.0};
-    _D[s1][s2] = _D[s2][s1] = shear_rate_ / 2.0;
     // Get "a4" fourth order orientation tensor (function of w_dist)
-    double _a4[3][3][3][3] = {0.0};
+    double _D[3][3] = {0.0}, _a4[3][3][3][3] = {0.0};
+
+    std::fill(_a4_D.data(), _a4_D.data() + _a4_D.num_elements(), 0.0);
+    _D[s1][s2] = _D[s2][s1] = shear_rate_ / 2.0;
+
+    auto wcts = std::chrono::system_clock::now();
     for (int phi_now = 0; phi_now < N; phi_now++) {
         for (int theta_now = 0; theta_now < M; theta_now++) {
             triple _p_triple(phi[phi_now], theta[theta_now]); // These should be stored somewhere
@@ -301,6 +312,8 @@ template <class d2vec_view1> d2vec Orientation_ao::get_tau_raw(const d2vec_view1
             }
         }
     }
+    std::chrono::duration<double> wctduration = (std::chrono::system_clock::now() - wcts);
+    // std::cout << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << std::endl;
     // Get a4:D
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {

@@ -41,7 +41,7 @@ vector<vector<double>> J_0(int ny_, vector<double> bessel_zeros_) {
     // Now assign J_0(λ_n*(r/R)) values to J_0(λ) vectors
     for (int i = 0; i <= ny_; i++) {
         for (int j = 0; j < bessel_zeros_.size(); j++) {
-            _values[i][j] = boost::math::cyl_bessel_j<double>(0, bessel_zeros_[j]*(((double) i)/((double) ny_)));
+            _values[i][j] = boost::math::cyl_bessel_j<double>(0, bessel_zeros_[j] * (((double) i) / ((double) ny_)));
         }
     }
     return _values;
@@ -65,11 +65,11 @@ double fourier_bessel(vector<double> bessel_zeros_, vector<double> J_1_values_, 
 
     for (int i = 0; i < bessel_zeros_.size(); i++) {
         _partsum += J_0_values_[r_i_][i] / (J_1_values_[i] * pow(bessel_zeros_[i], 3));
-        _sum += (1.0/pow(bessel_zeros_[i], 3)) * (J_0_values_[r_i_][i] / J_1_values_[i])
+        _sum += (1.0 / pow(bessel_zeros_[i], 3)) * (J_0_values_[r_i_][i] / J_1_values_[i])
               * exp(-pow(bessel_zeros_[i], 2) *((visc_ / _dens) * (params_.getdt()*(double) t_step_))
               / pow(params_.getR(), 2));
     }
-    _sum = 2 * _sum * params_.getdp() * pow(params_.getR(), 2) * params_.getR() / (params_.getl() * visc_);
+    _sum = 2 * _sum * params_.getdp() * pow(params_.getR(), 2) / (params_.getl() * visc_);
 
     return _sum;
 }

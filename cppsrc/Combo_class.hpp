@@ -11,7 +11,7 @@
 typedef boost::multi_array<double, 3>  d3vec;
 
 class Combo_class {
-    double shear_rate, diffusion_coeff_max, visco0, Np_max, beta;
+    double shear_rate, diffusion_coeff_max, Np_max, visco0, beta;
     int classes, M, N;
     double d_classes; 
     d3vec distribution;

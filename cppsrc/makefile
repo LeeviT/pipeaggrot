@@ -12,9 +12,9 @@ INCL = -I. -I/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc
 # Linking needs -lm to enable certain mathematical functions
 LINK = -L/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/include/lib/ -lsundials_nvecserial -lsundials_cvode -lm -llapack -lblas -lgcov
 # LINK = -L/home/mmo/lib/ -lm -llapack -lblas -lgcov
-SOURCES = main.cpp Combo_class.cpp orientation_control_vol_acorrected.cpp velo.cpp io.cpp point.cpp
+SOURCES = main.cpp Combo_class.cpp orientation_control_vol.cpp velo.cpp io.cpp point.cpp
 #SOURCES = main.cpp Combo_class.cpp orientation_control_vol.cpp
-OUTFILE = run_control_vol_acorrected.exe
+OUTFILE = run_control_vol.exe
 #OUTFILE = run_control_vol.exe
 
 $(OUTFILE): $(SOURCES)
@@ -26,4 +26,4 @@ pack:
 documentation:
 	doxygen
 profile:
-	gprof run_control_vol_acorrected.exe | ./gprof2dot.py | dot -Tpng -o profile.png
+	gprof run_control_vol.exe | ./gprof2dot.py | dot -Tpng -o profile.png

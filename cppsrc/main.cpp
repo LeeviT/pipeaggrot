@@ -51,7 +51,7 @@ int main() {
     vector<Combo_class *> _user_data;
     vector<double> _visc_vector;
     vector<point> _radius;
-    double _time = 0, _shear_rate = 0.0, _visc_raw_til;
+    double _time = 0, _shear_rate = 0.0, _upd_shear_rate, _visc_raw_til;
     int _system_size;
     // Initialize SUNDIALS stuff
     vector<void *> _cvode_mem;
@@ -130,8 +130,11 @@ int main() {
             _radius[i].setx(1.0);
             _radius[i].setvx(vx_pipe(_radius[i], _params, _bessel_zeros, _J_1_values, _J_0_values, i, t_step));
 
-            // Update shear rate for the AO model
-            _combined[i].update_shear_rate(_radius[i].getvx());
+            // Update shear rate for the AO model, if not on the edge of the pipe
+            if (i < _params.getny()) {
+                _upd_shear_rate = (_radius[i].getvx() * 4.0) / _params.getR();
+                _combined[i].update_shear_rate(_upd_shear_rate);
+            }
 
             // Some AO model solver stuff
             if (i == 0) { CVode(_cvode_mem[i], _time + _params.getdt(), _y0[i], &_time, CV_NORMAL); }
@@ -139,7 +142,11 @@ int main() {
             _visc_raw_til = _combined[i].get_visc_raw(_params.gets1(), _params.gets2(), t_step);
 
             // Compute total viscosity of the fluid
-            _visc_vector[i] = _params.getvisc0() + 2 * _params.getvisc0() * _visc_raw_til;
+            if (i < _params.getny()) {
+                _visc_vector[i] = _params.getvisc0() + 2 * _params.getvisc0() * _visc_raw_til;
+            } else {
+                _visc_vector[i] = _params.getvisc0();
+            }
 
             // Some printing stuff
             _visctotfile[i].open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
