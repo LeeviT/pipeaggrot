@@ -15,3 +15,8 @@ cppsrc/nvector/
 cppsrc/*.exe
 cppsrc/sundials/
 cppsrc/gmon.out
+cppsrc/analysis.txt
+cppsrc/examples/
+cppsrc/lib/
+cppsrc/sunlinsol/
+cppsrc/sunmatrix/
