@@ -1,17 +1,17 @@
-CC = g++
-#CC = icc
+CC = mpic++
 # Default
 #COPTS = -pg -DBOOST_DISABLE_ASSERTS
 ## Optimize 
-COPTS = -std=c++11 -pg -O3 -m3dnow -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
+## COPTS = -std=c++11 -fopenmp -pg -O3 -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
+COPTS = -std=c++11 -fopenmp -pg -O2 -DBOOST_DISABLE_ASSERTS
 ## Madman
 # COPTS = -O3 -march=native -funroll-loops -ftree-loop-linear -fprefetch-loop-arrays -DBOOST_DISABLE_ASSERTS
 # Debug options
 # COPTS = -DDEBUG -g -pg -O5 -m3dnow -mssse3 -finline-functions -fprofile-arcs -ftest-coverage -ffast-math -mrecip
-INCL = -I. -I/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc_par/include/
+INCL = -I. -I/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/include/
 # Linking needs -lm to enable certain mathematical functions
-LD_LIBRARY_PATH = /u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc_par/lib/
-LINK = -L/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc_par/lib -lsundials_cvode -lsundials_sunlinsolspgmr -lsundials_nvecserial -lsundials_nvecmanyvector -lm -llapack -lblas -lgcov
+LD_LIBRARY_PATH = /u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/lib/
+LINK = -L/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/lib -lsundials_cvode -lsundials_sunlinsolspgmr -lsundials_nvecserial -lsundials_nvecopenmp -lm -llapack -lblas -lgcov
 SOURCES = main.cpp Combo_class.cpp orientation_control_vol.cpp velo.cpp io.cpp point.cpp
 OUTFILE = pipeaggrot.exe
 
