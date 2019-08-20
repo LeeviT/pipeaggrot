@@ -1,4 +1,4 @@
-CC = mpic++
+CC = mpiicpc
 # Default
 #COPTS = -pg -DBOOST_DISABLE_ASSERTS
 ## Optimize 

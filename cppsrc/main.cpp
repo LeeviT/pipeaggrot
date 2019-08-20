@@ -70,7 +70,7 @@ int main(int argc_, char *argv_[]) {
     // typedef void (*CVodeLocalFn)(int, realtype, N_Vector, N_Vector, void *);
     // CVLocalFn _gloc;
     // int _nthreads_max = omp_get_max_threads();
-    int _nthreads_max = 8;
+    int _nthreads_max = 1;
     // MPI stuff
     int _myid, _ntasks, _i_ntasks, _start_i, _end_i, _ntasks_leftover, _mpi_err;
 
@@ -106,7 +106,11 @@ int main(int argc_, char *argv_[]) {
         _start_i = _myid * _i_ntasks + _ntasks_leftover;
         _end_i = _myid * _i_ntasks + _ntasks_leftover + _i_ntasks - 1;
     }
-    // cout << "proc_n: " << _myid << ",\tstart_i: " << _start_i << ",\tend_i: " << _end_i  << endl;
+    // Allocate dicretization point on the edge of the pipe always to the last (by rank) process
+    // This balances the load between processes optimically, or at least points-per-process-wise
+    if (_myid == _ntasks - 1) {
+        _end_i += 1;
+    }
 
     // Allocate memory and initialize uniform viscosity vector for the first timestep
     _visc_vector = init_visc_vector(_params.getny() + 1, _params.getvisc0());
@@ -114,7 +118,7 @@ int main(int argc_, char *argv_[]) {
     // Startup velocity stuff
     vector<double> _bessel_zeros(_n_bessel_zeros), _J_1_values(_n_bessel_zeros);
     vector<vector<double>> _J_0_values(_params.getny() + 1);
-    for (int i = _start_i; i <= _end_i; i++) { _J_0_values[i].resize(_n_bessel_zeros); }
+    for (int i = 0; i <= _params.getny(); i++) { _J_0_values[i].resize(_n_bessel_zeros); }
     _bessel_zeros = calc_bessel_zeros(_n_bessel_zeros);
     _J_0_values = J_0(_params.getny(), _bessel_zeros);
     _J_1_values = J_1(_bessel_zeros);
@@ -162,11 +166,11 @@ int main(int argc_, char *argv_[]) {
 
     // The main timestep loop
     for (int t_step = 0; t_step <= _params.gett_max(); t_step++) {
+        // Print current timestep and time to the screen if in the first/master process
         if (_myid == 0) {
             printf("t_step=%i of %i\n", t_step, _params.gett_max());
             cout << "time: " << _time << endl;
         }
-
         // Loop goes through the other points in y-direction, starting from the middle and sets the following
         // values for each discretization point
         for (int i = _start_i; i <= _end_i; i++) {
@@ -183,16 +187,14 @@ int main(int argc_, char *argv_[]) {
                 _upd_shear_rate = (_radius[i - _start_i].getvx() * 4.0) / _params.getR();
                 _combined[i - _start_i].update_shear_rate(_upd_shear_rate);
             }
-
             // Some AO model solver stuff
             auto wcts = chrono::system_clock::now();
-            if (i == 0) { CVode(_cvode_mem[i - _start_i], _time + _params.getdt(),
-                                _y0[i - _start_i], &_time, CV_NORMAL); }
-            else { CVode(_cvode_mem[i - _start_i], _time, _y0[i - _start_i], &_time, CV_NORMAL); }
+            CVode(_cvode_mem[i - _start_i], _time + _params.getdt(), _y0[i - _start_i], &_time, CV_NORMAL);
+
             chrono::duration<double> wctduration = (chrono::system_clock::now() - wcts);
             // cout << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << endl;
             _visc_raw_til = _combined[i - _start_i].get_visc_raw(_params.gets1(), _params.gets2(), t_step);
-
+            // cout << "from proc " << _myid << ", r=" << _radius[i - _start_i].getr() << endl;
             // Compute total viscosity of the fluid
             if (i < _params.getny()) {
                 _visc_vector[i - _start_i] = _params.getvisc0() + 2 * _params.getvisc0() * _visc_raw_til;
@@ -200,21 +202,20 @@ int main(int argc_, char *argv_[]) {
                 _visc_vector[i - _start_i] = _params.getvisc0();
             }
 
-            // Block a single process here, until every process has reached MPI_Barrier()
-            MPI_Barrier(MPI_COMM_WORLD);
             // Some printing stuff
             _visctotfile[i - _start_i].open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
-            _visctotfile[i - _start_i] << _time << "\t" << _visc_vector[i] << endl;
+            _visctotfile[i - _start_i] << _time << "\t" << _visc_vector[i - _start_i] << endl;
             _visctotfile[i - _start_i].close();
-            cout << "r: " << _radius[i - _start_i].getr() << ", total visc: " << _visc_vector[i] << ", v: "
+            cout << "r: " << _radius[i - _start_i].getr() << ", total visc: " << _visc_vector[i - _start_i] << ", v: "
                  << _radius[i - _start_i].getvx() << endl;
             _combined[i - _start_i].save_aggr_distribution(_time);
         }
-        cout << " " << endl;
+        // Block a single process here, until every process has reached MPI_Barrier()
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (_myid == _ntasks - 1) cout << " " << endl;
         // Writes r and vx values to file
         write_r_vx(_params.getny(), t_step, _radius);
     }
-    cout << "juuh" << endl;
     for (int i = _start_i; i <= _end_i; i++) {
         _combined[i - _start_i].save_state();
         N_VDestroy_OpenMP(_y0[i - _start_i]);
