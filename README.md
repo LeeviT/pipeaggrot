@@ -8,7 +8,7 @@ particles must be calculated first. To do this, program is using particle distri
 single particles in order to calculate distribution function for particle aggregations and 
 orientations. From AO distribution, local stress of fluid is calculated. Basically, in order to get
 stress, program is calculating 
-![](doc/stress.png)
+![](doc/stress.png)  
 where the fourth moment of orientation tensor is calculated from
 ![](doc/moment.png)
 See e.g. paper [Rheological modeling of carbon nanotube aggregate suspensions 
