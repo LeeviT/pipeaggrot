@@ -18,10 +18,10 @@ def readfile(filename):
 
 
 filelist = []
-r0, vx0 = readfile("r_vx1000.dat")
+r0, vx0 = readfile("r_vx100.dat")
 vxnorm = vx0[0]
 
-for i in range(0, 1000):
+for i in range(0, 100):
     filelist.append("r_vx%s.dat" % i)
 
 for fname in filelist:
@@ -34,10 +34,10 @@ r, vx = readfile("r_vx10.dat")
 plt.plot(r, np.array(vx)/vxnorm, '-', label="t=0.01 s")
 r, vx = readfile("r_vx50.dat")
 plt.plot(r, np.array(vx)/vxnorm, '-', label="t=0.05 s")
-r, vx = readfile("r_vx250.dat")
-plt.plot(r, np.array(vx)/vxnorm, '-', label="t=0.25 s")
-r, vx = readfile("r_vx1000.dat")
-plt.plot(r, np.array(vx)/vxnorm, '-', label="t=1.0 s")
+r, vx = readfile("r_vx100.dat")
+plt.plot(r, np.array(vx)/vxnorm, '-', label="t=0.1 s")
+# r, vx = readfile("r_vx1000.dat")
+# plt.plot(r, np.array(vx)/vxnorm, '-', label="t=1.0 s")
 plt.title("dp = 10 MPa")
 plt.xlabel('radius')
 plt.ylabel('velocity')

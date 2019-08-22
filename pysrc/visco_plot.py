@@ -17,10 +17,10 @@ def readfile(filename):
     return t, visc
 
 
-plt.xlim(1e-3, 1.5)
+plt.xlim(1e-3, 0.25)
 # plt.ylim(1, 1.3)
 t0, visc0 = readfile("visctot0.dat")
-t1, visc1 = readfile("visctot9.dat")
+t1, visc1 = readfile("visctot4.dat")
 plt.semilogx()
 plt.plot(t0, visc0, '-', label='r=0.0')
 plt.plot(t1, visc1, '-', label='r=0.9')

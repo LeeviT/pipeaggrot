@@ -19,9 +19,9 @@ def readfile(filename):
     return t, phi, theta
 
 
-time_steps = 5001
-dt = 0.001
-ny = 10
+time_steps = 501
+dt = 0.0005
+ny = 5
 
 t0, phi0, theta0 = readfile("../cppsrc/dist/class_0.dat")
 plt.xlim(dt, time_steps*dt)
@@ -62,7 +62,7 @@ for i in range(1, time_steps + 1):
 
 print(phi_upper)
 plt.xscale('log')
-plt.xlim(1e-3, 1)
+plt.xlim(1e-3, 0.25)
 plt.plot(dt*np.array(t0), phi_avg)
 plt.fill_between(dt*np.array(t0), phi_upper, phi_lower, facecolor='0.85', label="min-max-interval")
 # plt.plot(dt*np.array(t0), theta_avg)
