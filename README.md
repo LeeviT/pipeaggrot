@@ -10,10 +10,14 @@ orientations. From AO distribution, local stress of fluid is calculated. Basical
 stress, program is calculating 
 ![](doc/stress.png)  
 where the fourth moment of orientation tensor is calculated from
-![](doc/moment.png)
+![](doc/moment.png)  
 See e.g. paper [Rheological modeling of carbon nanotube aggregate suspensions 
 (W. K. A. Ma et al. 2008)
 ](https://sor.scitation.org/doi/abs/10.1122/1.2982932) for more detailed description of AO model. 
 As a local stress of fluid is calculated, it is used to calculate a local viscosity from which 
 fluid velocity is calculated in discretization points in a following way
-![](doc/velo.png)
+![](doc/velo.png)  
+where λ<sub>n</sub> are roots of Bessel function of the first kind of the first order, i.e. 
+J<sub>0</sub>(λ<sub>n</sub>)=0.  
+
+## Source code
