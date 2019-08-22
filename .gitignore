@@ -20,3 +20,4 @@ cppsrc/examples/
 cppsrc/lib/
 cppsrc/sunlinsol/
 cppsrc/sunmatrix/
+*.exe

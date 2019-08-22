@@ -171,8 +171,6 @@ int main(int argc_, char *argv_[]) {
         // values for each discretization point
         for (int i = _start_i; i <= _end_i; i++) {
             // If in y-midpoint of the pipe, r coordinate is zero, naturally
-            cout << i - _start_i << endl;
-            cout << _radius.size() << endl;
             _r = (i == 0) ? 0.0 : ((double) i / _params.getny()) * _params.getR();
             _radius[i - _start_i].setr(_r);
             _radius[i - _start_i].setvisc(_visc_vector[i - _start_i]);
@@ -201,7 +199,7 @@ int main(int argc_, char *argv_[]) {
             }
 
             // Some printing stuff
-            _visctotfile[i - _start_i].open("../pysrc/visctot" + to_string(i) + ".dat", ios::app);
+            _visctotfile[i - _start_i].open("output/visctot" + to_string(i) + ".dat", ios::app);
             _visctotfile[i - _start_i] << _time << "\t" << _visc_vector[i - _start_i] << endl;
             _visctotfile[i - _start_i].close();
             cout << "r: " << _radius[i - _start_i].getr() << ", total visc: " << _visc_vector[i - _start_i] << ", v: "

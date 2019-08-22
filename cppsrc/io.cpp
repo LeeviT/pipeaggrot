@@ -92,7 +92,7 @@ void input::read_input_file() {
 void write_r_vx(int ny_, int t_step_, vector<point> radius_) {
     ofstream _file;
 
-    _file.open("../pysrc/r_vx" + to_string(t_step_) + ".dat");
+    _file.open("output/r_vx" + to_string(t_step_) + ".dat");
 
     for (int i = 0; i <= ny_; i++) {
         _file << radius_[i].getr() << "\t" << radius_[i].getvx() << "\n";

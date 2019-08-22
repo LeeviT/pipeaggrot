@@ -16,7 +16,7 @@ SOURCES = main.cpp Combo_class.cpp orientation_control_vol.cpp velo.cpp io.cpp p
 OUTFILE = pipeaggrot.exe
 
 $(OUTFILE): $(SOURCES)
-	$(CC) -o $(OUTFILE) $(COPTS) $(INCL) $(SOURCES) $(LINK)
+	$(CC) -o $(OUTFILE) $(COPTS) $(INCL) $(SOURCES) $(LINK) | mv pipeaggrot.exe ../
 clean:
 	rm -rf *.exe *.o
 pack:
