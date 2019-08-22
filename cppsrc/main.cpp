@@ -1,3 +1,4 @@
+// C++ libraries
 #include <iostream>
 #include <cstdio>
 #include <cmath>
@@ -9,28 +10,22 @@
 #include <chrono>
 #include <omp.h>
 #include <mpich/mpi.h>
-
+// Source code header files
 #include "point.hpp"
 #include "io.hpp"
 #include "velo.hpp"
 #include "Combo_class.hpp"
-
-#include "cvode/cvode.h"
-#include "cvode/cvode_bbdpre.h"
-#include "cvode/cvode_bandpre.h"
-#include "nvector/nvector_serial.h"
-#include "nvector/nvector_openmp.h"
-#include "sundials/sundials_dense.h"
-#include "sundials/sundials_types.h"
-#include "sundials/sundials_math.h"
-#include "sundials/sundials_matrix.h"
-#include "sunmatrix/sunmatrix_dense.h"
-#include "sunlinsol/sunlinsol_spgmr.h"
-
+// SUNDIALS CVODE libraries
+#include "include/cvode/cvode.h"
+#include "include/nvector/nvector_openmp.h"
+#include "include/sundials/sundials_math.h"
+#include "include/sundials/sundials_matrix.h"
+#include "include/sunmatrix/sunmatrix_dense.h"
+#include "include/sunlinsol/sunlinsol_spgmr.h"
+// Use standard C++ namespace everywhere in the main file since other namespaces are not used
 using namespace std;
 
-// The function needed by the sundials solver "return dt"
-// (get ydot at given t, y, and *userdata)
+// The function needed by the sundials solver "return dt", get ydot at given t, y, and *userdata
 int wfunc(realtype t_, N_Vector y_, N_Vector ydot_, void * userdata_) {
     auto * _combined_ptr = (Combo_class *) userdata_;
     _combined_ptr->get_dt(NV_DATA_OMP(ydot_), NV_DATA_OMP(y_));
@@ -64,6 +59,7 @@ int main(int argc_, char *argv_[]) {
     vector<void *> _cvode_mem;
     vector<N_Vector> _y0, _y_tmp;
     vector<ofstream> _visctotfile;
+    vector<SUNLinearSolver> _lin_sol;
     // Startup velocity stuff
     int _n_bessel_zeros = 200;
     // OpenMP and preconditioning stuff
@@ -85,8 +81,7 @@ int main(int argc_, char *argv_[]) {
     // Print input values to the screen if in the first/master process
     if (_myid == 0) {
         printf("dp=%f, l=%f, visc=%f, R=%f, dt=%f, diff_coeff=%f\n", _params.getdp(), _params.getl(),
-               _params.getvisc0(),
-               _params.getR(), _params.getdt(), _params.getdiff_coeff());
+               _params.getvisc0(), _params.getR(), _params.getdt(), _params.getdiff_coeff());
         printf("aspect_ratio=%f, beta=%f, shear_rate_max=%f, Np_max=%f\n", _params.getaspect_ratio(), _params.getbeta(),
                _params.getshear_rate_max(), _params.getNp_max());
         printf("theta_grid=%i, phi_grid=%i, classes=%i, what_todo=%i\n", _params.gettheta_grid(), _params.getphi_grid(),
@@ -129,6 +124,7 @@ int main(int argc_, char *argv_[]) {
         _radius.emplace_back();
         _combined.emplace_back();
         _visctotfile.emplace_back();
+        _lin_sol.emplace_back();
     }
 
     // Population system size in spherical coordinates
@@ -155,8 +151,8 @@ int main(int argc_, char *argv_[]) {
         CVodeSStolerances(_cvode_mem.at(i - _start_i), 1.0e-8, 1.0e-8);
         CVodeSetMaxNumSteps(_cvode_mem.at(i - _start_i), 100000);
         // Specify dense/SPGMR solver
-        SUNLinearSolver _lin_sol = SUNLinSol_SPGMR(_y_tmp.at(i - _start_i), 0, 0);
-        CVodeSetLinearSolver(_cvode_mem.at(i - _start_i), _lin_sol, _jacobian);
+        _lin_sol.at(i - _start_i) = SUNLinSol_SPGMR(_y_tmp.at(i - _start_i), 0, 0);
+        CVodeSetLinearSolver(_cvode_mem.at(i - _start_i), _lin_sol.at(i - _start_i), _jacobian);
         // CVBBDPrecInit(_cvode_mem.at(i), _system_size, _system_size, _system_size, _system_size, _system_size, 0.0, _gloc(_system_size, _time, _y0.at(i), _glocal.at(i), _user_data.at(i)), NULL);
         // We need to run the solver for very tiny timestep to initialize it properly
         CVode(_cvode_mem.at(i - _start_i), 1e-14, _y0.at(i - _start_i), &_time, CV_ONE_STEP);
@@ -175,6 +171,8 @@ int main(int argc_, char *argv_[]) {
         // values for each discretization point
         for (int i = _start_i; i <= _end_i; i++) {
             // If in y-midpoint of the pipe, r coordinate is zero, naturally
+            cout << i - _start_i << endl;
+            cout << _radius.size() << endl;
             _r = (i == 0) ? 0.0 : ((double) i / _params.getny()) * _params.getR();
             _radius[i - _start_i].setr(_r);
             _radius[i - _start_i].setvisc(_visc_vector[i - _start_i]);

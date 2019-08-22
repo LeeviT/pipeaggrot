@@ -3,7 +3,7 @@ CC = mpiicpc
 #COPTS = -pg -DBOOST_DISABLE_ASSERTS
 ## Optimize 
 ## COPTS = -std=c++11 -fopenmp -pg -O3 -mssse3 -finline-functions -DBOOST_DISABLE_ASSERTS
-COPTS = -std=c++11 -fopenmp -pg -O2 -DBOOST_DISABLE_ASSERTS
+COPTS = -std=c++11 -qopenmp -fopenmp -pg -O2 -DBOOST_DISABLE_ASSERTS
 ## Madman
 # COPTS = -O3 -march=native -funroll-loops -ftree-loop-linear -fprefetch-loop-arrays -DBOOST_DISABLE_ASSERTS
 # Debug options
