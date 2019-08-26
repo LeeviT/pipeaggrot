@@ -14,11 +14,12 @@
 #include "point.hpp"
 #include "io.hpp"
 #include "velo.hpp"
-#include "Combo_class.hpp"
+#include "combo.hpp"
 // SUNDIALS CVODE libraries
 #include "include/cvode/cvode.h"
 #include "include/nvector/nvector_openmp.h"
 #include "include/sundials/sundials_math.h"
+#include "include/sundials/sundials_types.h"
 #include "include/sundials/sundials_matrix.h"
 #include "include/sunmatrix/sunmatrix_dense.h"
 #include "include/sunlinsol/sunlinsol_spgmr.h"
@@ -27,7 +28,7 @@ using namespace std;
 
 // The function needed by the sundials solver "return dt", get ydot at given t, y, and *userdata
 int wfunc(realtype t_, N_Vector y_, N_Vector ydot_, void * userdata_) {
-    auto * _combined_ptr = (Combo_class *) userdata_;
+    auto * _combined_ptr = (combo *) userdata_;
     _combined_ptr->get_dt(NV_DATA_OMP(ydot_), NV_DATA_OMP(y_));
     return 0;
 }
@@ -48,8 +49,8 @@ int main(int argc_, char *argv_[]) {
     double _r;
     // Initialize variables and class instances
     input _params{};
-    vector<Combo_class> _combined;
-    vector<Combo_class *> _user_data;
+    vector<combo> _combined;
+    vector<combo *> _user_data;
     vector<double> _visc_vector;
     vector<point> _radius;
     double _shear_rate = 0.0, _upd_shear_rate, _visc_raw_til;
@@ -62,10 +63,7 @@ int main(int argc_, char *argv_[]) {
     vector<SUNLinearSolver> _lin_sol;
     // Startup velocity stuff
     int _n_bessel_zeros = 200;
-    // OpenMP and preconditioning stuff
-    // typedef void (*CVodeLocalFn)(int, realtype, N_Vector, N_Vector, void *);
-    // CVLocalFn _gloc;
-    // int _nthreads_max = omp_get_max_threads();
+    // OpenMP stuff
     int _nthreads_max = 1;
     // MPI stuff
     int _myid, _ntasks, _i_ntasks, _start_i, _end_i, _ntasks_leftover, _mpi_err;
@@ -153,7 +151,6 @@ int main(int argc_, char *argv_[]) {
         // Specify dense/SPGMR solver
         _lin_sol.at(i - _start_i) = SUNLinSol_SPGMR(_y_tmp.at(i - _start_i), 0, 0);
         CVodeSetLinearSolver(_cvode_mem.at(i - _start_i), _lin_sol.at(i - _start_i), _jacobian);
-        // CVBBDPrecInit(_cvode_mem.at(i), _system_size, _system_size, _system_size, _system_size, _system_size, 0.0, _gloc(_system_size, _time, _y0.at(i), _glocal.at(i), _user_data.at(i)), NULL);
         // We need to run the solver for very tiny timestep to initialize it properly
         CVode(_cvode_mem.at(i - _start_i), 1e-14, _y0.at(i - _start_i), &_time, CV_ONE_STEP);
     }

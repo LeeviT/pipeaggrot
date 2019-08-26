@@ -2,7 +2,7 @@
 //Direct approach:: disrectization in spherical coordinates: control volume scheme
 //-- working version
 
-#include "orientation_control_vol.hpp"
+#include "orientation.hpp"
 #include "boost/multi_array.hpp"
 
 #include <vector>

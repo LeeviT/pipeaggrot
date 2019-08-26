@@ -21,3 +21,5 @@ where λ<sub>n</sub> are roots of Bessel function of the first kind of the first
 J<sub>0</sub>(λ<sub>n</sub>)=0.  
 
 ## Source code
+Detailed description of source code functions (those written by me and few others) can be found 
+under [```/doc```](https://github.com/LeeviT/pipeaggrot/tree/master_par/doc) directory.

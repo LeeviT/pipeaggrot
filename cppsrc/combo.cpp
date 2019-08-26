@@ -1,4 +1,4 @@
-#include "Combo_class.hpp"
+#include "combo.hpp"
 #include <algorithm>
 #include <iostream>
 #include <string.h> // memcpy is in string.h ...
@@ -9,7 +9,7 @@ using namespace std;
 using namespace boost;
 
 // Now we need extra space os size "classes" for the aggregation distribution
-void Combo_class::initialize(double shear_rate_, input params_) {
+void combo::initialize(double shear_rate_, input params_) {
 
     double _diffusion_coeff;
     shear_rate = shear_rate_;
@@ -41,8 +41,8 @@ void Combo_class::initialize(double shear_rate_, input params_) {
     }
 }
 
-// After this function the distribution stored in Combo_class is the one given as input * y_now_
-void Combo_class::get_dt(double * y_dot_, double * y_now_) {
+// After this function the distribution stored in combo is the one given as input * y_now_
+void combo::get_dt(double * y_dot_, double * y_now_) {
     // Quite some overhead here since have to copy a large array at each step ... 
     // Working with boost multiarray -- that's why
     memcpy(distribution.data(), y_now_, sizeof(double) * distribution.num_elements());
@@ -68,7 +68,7 @@ void Combo_class::get_dt(double * y_dot_, double * y_now_) {
 }
 
 // Simple function for setting uniform initial state
-void Combo_class::set_uniform_state(double * y_now_) {
+void combo::set_uniform_state(double * y_now_) {
     // Step1:: the distribution
     fill(distribution.data(), distribution.data() + distribution.num_elements(), 0.0);
     for (int i = 0; i < classes; i++) {
@@ -84,7 +84,7 @@ void Combo_class::set_uniform_state(double * y_now_) {
 }
 
 // Simple function for loading a state from file
-void Combo_class::load_state(double * y_now_) {
+void combo::load_state(double * y_now_) {
     // Step1:: read the State from a file into distribution
     ifstream _read_file("saved_state.dat");
     for (int i = 0; i < classes; i++) {
@@ -99,7 +99,7 @@ void Combo_class::load_state(double * y_now_) {
 }
     
 // Simple function for saving a state from a file
-void Combo_class::save_state() {
+void combo::save_state() {
     ofstream _save_file("saved_state.dat");
     for (int i = 0; i < classes; i++) {
         for (int j = 0; j <= N; j++) {
@@ -111,7 +111,7 @@ void Combo_class::save_state() {
     }
 }
 
-double Combo_class::get_visc_raw(int s1_, int s2_, int timestep_) {
+double combo::get_visc_raw(int s1_, int s2_, int timestep_) {
     for (int i = 0; i < classes; i++) {
         multi_array_ref<double, 2>::array_view<2>::type _tempView_wdist = distribution[indices[i][range(0, N)][range()]];
         orientation_class[i].dist_avgs(_tempView_wdist, i, timestep_);
@@ -120,7 +120,7 @@ double Combo_class::get_visc_raw(int s1_, int s2_, int timestep_) {
 }
 
 // This should give the stress part due to the orientation...
-double Combo_class::get_tau_raw(int s1_, int s2_) {
+double combo::get_tau_raw(int s1_, int s2_) {
     double _Npi, _aggr_part;
 
     d2vec _tau_raw(boost::extents[3][3]);
@@ -150,7 +150,7 @@ double Combo_class::get_tau_raw(int s1_, int s2_) {
 }
 
 ///Get probability for each size class
-void Combo_class::get_tot_prob(double time_now_) {
+void combo::get_tot_prob(double time_now_) {
 	double _aggr_prob = 0.0;
 
     cout << "ClassProb c = " << classes << " t = " << time_now_ << " ";
@@ -163,7 +163,7 @@ void Combo_class::get_tot_prob(double time_now_) {
     cout << _aggr_prob << " " << endl;
 }
 
-void Combo_class::save_aggr_distribution(double time_now_) {
+void combo::save_aggr_distribution(double time_now_) {
     ofstream _save_file("aggr_dists.dat", std::ios::out | std::ios::app);
 	_save_file << "#at " << time_now_ << endl;
 	for (int i = 0; i < classes; i++) {
@@ -172,7 +172,7 @@ void Combo_class::save_aggr_distribution(double time_now_) {
 	_save_file << "\n\n";
 }
 
-void Combo_class::update_shear_rate(double shear_rate_) {
+void combo::update_shear_rate(double shear_rate_) {
     shear_rate = shear_rate_;
     if (classes > 1) aggregation_class.update_v_aggregation(shear_rate_);
     if (M != 1 && N != 1) { //If this is false forget about the orientation part

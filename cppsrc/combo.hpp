@@ -1,8 +1,8 @@
 #ifndef COMBOCLASS_AO_2012
 #define COMBOCLASS_AO_2012
 
-#include "orientation_control_vol.hpp"
-#include "dist_combo.hpp"
+#include "orientation.hpp"
+#include "distribution.hpp"
 #include "point.hpp"
 #include "io.hpp"
 
@@ -10,7 +10,7 @@
 
 typedef boost::multi_array<double, 3>  d3vec;
 
-class Combo_class {
+class combo {
     double shear_rate, diffusion_coeff_max, Np_max, visco0, beta;
     int classes, M, N;
     double d_classes; 

@@ -12,16 +12,21 @@ INCL = -I. -I/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/include/
 # Linking needs -lm to enable certain mathematical functions
 LD_LIBRARY_PATH = /u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/lib/
 LINK = -L/u/83/tuikkal1/unix/csm/pipeaggrot/cppsrc/lib -lsundials_cvode -lsundials_sunlinsolspgmr -lsundials_nvecserial -lsundials_nvecopenmp -lm -llapack -lblas -lgcov
-SOURCES = main.cpp Combo_class.cpp orientation_control_vol.cpp velo.cpp io.cpp point.cpp
+SOURCES = main.cpp combo.cpp orientation.cpp velo.cpp io.cpp point.cpp
 OUTFILE = pipeaggrot.exe
 
 $(OUTFILE): $(SOURCES)
-	$(CC) -o $(OUTFILE) $(COPTS) $(INCL) $(SOURCES) $(LINK) | mv pipeaggrot.exe ../
+	$(CC) -o $(OUTFILE) $(COPTS) $(INCL) $(SOURCES) $(LINK) 
+	mv -f $(OUTFILE) ../
+
 clean:
 	rm -rf *.exe *.o
+
 pack:
 	tar -cf ao_src.tar *.cpp *.hpp Doxyfile makefile 
+
 documentation:
 	doxygen
+
 profile:
 	gprof pipeaggrot.exe | ./gprof2dot.py | dot -Tpng -o profile.png
