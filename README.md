@@ -22,4 +22,20 @@ J<sub>0</sub>(λ<sub>n</sub>)=0.
 
 ## Source code
 Detailed description of source code functions (those written by me and few others) can be found 
-under [```/doc```](https://github.com/LeeviT/pipeaggrot/tree/master_par/doc) directory.
+under [```pipeaggrot/doc/```](https://github.com/LeeviT/pipeaggrot/tree/master_par/doc) directory.
+
+## Installing 
+### Requirements 
+Program requires C++11 and any compiler which supports it. Currently in the makefile Intel C++ 
+compiler is used.  
+Also [Boost C++ Libraries](https://www.boost.org/) and [SUNDIALS/CVODE ODE solver
+library](https://computing.llnl.gov/projects/sundials/cvode) are required. Installation 
+instructions of those libraries can be found in their documentation. However, both libraries must 
+be installed under [```pipeaggrot/cppsrc/```](https://github.com/LeeviT/pipeaggrot/tree/master_par/cppsrc) 
+directory. So, if using ```cmake``` in SUNDIALS installation, use the following commands  
+```
+cmake -DCMAKE_INSTALL_PREFIX=$SOME_PATH/pipeaggrot/cppsrc \
+-DEXAMPLES_INSTALL_PATH=$SOME_PATH/pipeaggrot/cppsrc/examples \
+-DOPENMP_ENABLE=ON \
+../sundials-VERSION
+```
